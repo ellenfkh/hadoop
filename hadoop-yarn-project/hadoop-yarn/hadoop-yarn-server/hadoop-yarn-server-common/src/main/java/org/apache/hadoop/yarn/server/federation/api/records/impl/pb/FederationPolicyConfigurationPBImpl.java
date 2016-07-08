@@ -15,7 +15,7 @@
  * the License.
  */
 
-package org.apache.hadoop.yarn.server.federation.records.impl.pb;
+package org.apache.hadoop.yarn.server.federation.api.records.impl.pb;
 
 import com.google.protobuf.TextFormat;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
@@ -23,7 +23,7 @@ import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.api.records.impl.pb.ProtoUtils;
 import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationProto;
 import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationProtoOrBuilder;
-import org.apache.hadoop.yarn.server.federation.records.FederationPolicyConfiguration;
+import org.apache.hadoop.yarn.server.federation.api.records.FederationPolicyConfiguration;
 
 import java.nio.ByteBuffer;
 

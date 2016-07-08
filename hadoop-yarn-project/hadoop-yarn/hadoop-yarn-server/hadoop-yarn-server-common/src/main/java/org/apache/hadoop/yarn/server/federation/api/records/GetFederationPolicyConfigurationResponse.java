@@ -15,7 +15,7 @@
  * the License.
  */
 
-package org.apache.hadoop.yarn.server.federation.records;
+package org.apache.hadoop.yarn.server.federation.api.records;
 
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceAudience.Public;
@@ -23,40 +23,23 @@ import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.util.Records;
 
 /**
- * UpdateFederationPolicyRequest is a request to the
- * {@code FederationPolicyStore} to update the information about the
- * distribution of resources across sub-clusters, i.e. the
- * {@link FederationPolicyConfiguration} for the specified queue.
+ * GetFederationPolicyConfigurationResponse contains the answer from the {@code
+ * FederationPolicyStore} to a request to get the information about {@link
+ * FederationPolicyConfiguration}, which represents the distribution of his resources across
+ * sub-clusters.
  */
 @Public
 @Unstable
-public abstract class SetFederationPolicyConfigurationRequest {
+public abstract class GetFederationPolicyConfigurationResponse {
+
   @Private
   @Unstable
-  public SetFederationPolicyConfigurationRequest newInstance(FederationPolicyConfiguration policy) {
-    SetFederationPolicyConfigurationRequest request =
-        Records.newRecord(SetFederationPolicyConfigurationRequest.class);
-    request.setPolicy(policy);
-    return request;
+  public GetFederationPolicyConfigurationResponse newInstance(FederationPolicyConfiguration policy) {
+    GetFederationPolicyConfigurationResponse response =
+        Records.newRecord(GetFederationPolicyConfigurationResponse.class);
+    response.setPolicy(policy);
+    return response;
   }
-
-  /**
-   * Get the name of the queue whose policy is required.
-   *
-   * @return the name of the queue
-   */
-  @Public
-  @Unstable
-  public abstract String getQueue();
-
-  /**
-   * Sets the name of the queue whose policy is required.
-   *
-   * @param queueName the name of the queue
-   */
-  @Private
-  @Unstable
-  public abstract void setQueue(String queueName);
 
   /**
    * Get the policy which represents the distribution of his resources across
@@ -77,4 +60,5 @@ public abstract class SetFederationPolicyConfigurationRequest {
   @Private
   @Unstable
   public abstract void setPolicy(FederationPolicyConfiguration policy);
+
 }

@@ -15,47 +15,55 @@
  * the License.
  */
 
-package org.apache.hadoop.yarn.server.federation.records.impl.pb;
+package org.apache.hadoop.yarn.server.federation.api.records.impl.pb;
 
 import com.google.protobuf.TextFormat;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyConfigurationRequestProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyConfigurationRequestProtoOrBuilder;
-import org.apache.hadoop.yarn.server.federation.records.GetFederationPolicyConfigurationRequest;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.SetFederationPolicyConfigurationResponseProto;
+import org.apache.hadoop.yarn.server.federation.api.records.SetFederationPolicyConfigurationResponse;
 
 /**
- * Protocol buffer based implementation of {@link GetFederationPolicyConfigurationRequest}.
+ * Protocol buffer based implementation of {@link SetFederationPolicyConfigurationResponse}.
  */
 @Private
 @Unstable
-public class GetFederationPolicyConfigurationRequestPBImpl
-    extends GetFederationPolicyConfigurationRequest {
+public class SetFederationPolicyConfigurationResponsePBImpl
+    extends SetFederationPolicyConfigurationResponse {
 
-  private GetFederationPolicyConfigurationRequestProto proto =
-      GetFederationPolicyConfigurationRequestProto.getDefaultInstance();
-  private GetFederationPolicyConfigurationRequestProto.Builder builder = null;
+  private SetFederationPolicyConfigurationResponseProto proto =
+      SetFederationPolicyConfigurationResponseProto.getDefaultInstance();
+  private SetFederationPolicyConfigurationResponseProto.Builder builder = null;
   private boolean viaProto = false;
 
-  public GetFederationPolicyConfigurationRequestPBImpl() {
-    builder = GetFederationPolicyConfigurationRequestProto.newBuilder();
+  public SetFederationPolicyConfigurationResponsePBImpl() {
+    builder = SetFederationPolicyConfigurationResponseProto.newBuilder();
   }
 
-  public GetFederationPolicyConfigurationRequestPBImpl(
-      GetFederationPolicyConfigurationRequestProto proto) {
+  public SetFederationPolicyConfigurationResponsePBImpl(
+      SetFederationPolicyConfigurationResponseProto proto) {
     this.proto = proto;
     viaProto = true;
   }
 
-  public GetFederationPolicyConfigurationRequestProto getProto() {
+  public SetFederationPolicyConfigurationResponseProto getProto() {
+    mergeLocalToProto();
     proto = viaProto ? proto : builder.build();
     viaProto = true;
     return proto;
   }
 
+  private void mergeLocalToProto() {
+    if (viaProto) {
+      maybeInitBuilder();
+    }
+    proto = builder.build();
+    viaProto = true;
+  }
+
   private void maybeInitBuilder() {
     if (viaProto || builder == null) {
-      builder = GetFederationPolicyConfigurationRequestProto.newBuilder(proto);
+      builder = SetFederationPolicyConfigurationResponseProto.newBuilder(proto);
     }
     viaProto = false;
   }
@@ -80,21 +88,4 @@ public class GetFederationPolicyConfigurationRequestPBImpl
   public String toString() {
     return TextFormat.shortDebugString(getProto());
   }
-
-  @Override
-  public String getQueue() {
-    GetFederationPolicyConfigurationRequestProtoOrBuilder p = viaProto ? proto : builder;
-    return p.getQueue();
-  }
-
-  @Override
-  public void setQueue(String queueName) {
-    maybeInitBuilder();
-    if (queueName == null) {
-      builder.clearQueue();
-      return;
-    }
-    builder.setQueue(queueName);
-  }
-
 }

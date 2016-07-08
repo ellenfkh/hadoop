@@ -15,7 +15,7 @@
  * the License.
  */
 
-package org.apache.hadoop.yarn.server.federation.records;
+package org.apache.hadoop.yarn.server.federation.api.records;
 
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceAudience.Public;
