@@ -35,9 +35,12 @@ public abstract class FederationPolicyConfiguration {
 
   @Private
   @Unstable
-  public static FederationPolicyConfiguration newInstance(String policyName,
-      byte[] policyDescriptor) {
-    FederationPolicyConfiguration policy = Records.newRecord(FederationPolicyConfiguration.class);
+  public static FederationPolicyConfiguration newInstance(String policyType,
+      ByteBuffer policyParams) {
+    FederationPolicyConfiguration policy =
+        Records.newRecord(FederationPolicyConfiguration.class);
+    policy.setType(policyType);
+    policy.setParams(policyParams);
     return policy;
   }
 
