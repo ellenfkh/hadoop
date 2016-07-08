@@ -65,3 +65,33 @@ message FederationSubClusterDeregisterResponseProto {
 message FederationMembershipStateVersionProto {
   optional VersionProto version = 1;
 }
+
+message FederationApplicationStateVersionProto {
+  optional VersionProto version = 1;
+}
+
+message FederationApplicationInfoProto {
+  optional ApplicationIdProto application_id = 1;
+  optional FederationSubClusterIdProto home_sub_cluster = 2;
+}
+
+message FederationInsertNewApplicationRequestProto {
+  optional FederationApplicationInfoProto application_info = 1;
+}
+
+message FederationInsertNewApplicationResponseProto {
+}
+
+message FederationUpdateApplicationRequestProto {
+  optional FederationApplicationInfoProto application_info = 1;
+}
+
+message FederationUpdateApplicationResponseProto {
+}
+
+message FederationDeleteApplicationRequestProto {
+  optional ApplicationIdProto application_id = 1;
+}
+
+message FederationDeleteApplicationResponseProto {
+}
