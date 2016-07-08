@@ -31,13 +31,13 @@ import java.nio.ByteBuffer;
  */
 @Public
 @Unstable
-public abstract class FederationPolicy {
+public abstract class FederationPolicyConfiguration {
 
   @Private
   @Unstable
-  public static FederationPolicy newInstance(String policyName,
+  public static FederationPolicyConfiguration newInstance(String policyName,
       byte[] policyDescriptor) {
-    FederationPolicy policy = Records.newRecord(FederationPolicy.class);
+    FederationPolicyConfiguration policy = Records.newRecord(FederationPolicyConfiguration.class);
     return policy;
   }
 
@@ -94,7 +94,7 @@ public abstract class FederationPolicy {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    FederationPolicy other = (FederationPolicy) obj;
+    FederationPolicyConfiguration other = (FederationPolicyConfiguration) obj;
     if (this.getType() != other.getType()) {
       return false;
     }

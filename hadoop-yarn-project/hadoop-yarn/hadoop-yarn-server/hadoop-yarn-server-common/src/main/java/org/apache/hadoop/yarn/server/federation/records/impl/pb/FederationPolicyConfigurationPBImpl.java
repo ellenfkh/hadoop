@@ -21,34 +21,34 @@ import com.google.protobuf.TextFormat;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.api.records.impl.pb.ProtoUtils;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyProtoOrBuilder;
-import org.apache.hadoop.yarn.server.federation.records.FederationPolicy;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationProto;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationProtoOrBuilder;
+import org.apache.hadoop.yarn.server.federation.records.FederationPolicyConfiguration;
 
 import java.nio.ByteBuffer;
 
 /**
- * Protocol buffer based implementation of {@link FederationPolicy}.
+ * Protocol buffer based implementation of {@link FederationPolicyConfiguration}.
  */
 @Private
 @Unstable
-public class FederationPolicyPBImpl extends FederationPolicy {
+public class FederationPolicyConfigurationPBImpl extends FederationPolicyConfiguration {
 
-  private FederationPolicyProto proto =
-      FederationPolicyProto.getDefaultInstance();
-  private FederationPolicyProto.Builder builder = null;
+  private FederationPolicyConfigurationProto proto =
+      FederationPolicyConfigurationProto.getDefaultInstance();
+  private FederationPolicyConfigurationProto.Builder builder = null;
   private boolean viaProto = false;
 
-  public FederationPolicyPBImpl() {
-    builder = FederationPolicyProto.newBuilder();
+  public FederationPolicyConfigurationPBImpl() {
+    builder = FederationPolicyConfigurationProto.newBuilder();
   }
 
-  public FederationPolicyPBImpl(FederationPolicyProto proto) {
+  public FederationPolicyConfigurationPBImpl(FederationPolicyConfigurationProto proto) {
     this.proto = proto;
     viaProto = true;
   }
 
-  public FederationPolicyProto getProto() {
+  public FederationPolicyConfigurationProto getProto() {
     proto = viaProto ? proto : builder.build();
     viaProto = true;
     return proto;
@@ -56,7 +56,7 @@ public class FederationPolicyPBImpl extends FederationPolicy {
 
   private void maybeInitBuilder() {
     if (viaProto || builder == null) {
-      builder = FederationPolicyProto.newBuilder(proto);
+      builder = FederationPolicyConfigurationProto.newBuilder(proto);
     }
     viaProto = false;
   }
@@ -84,7 +84,7 @@ public class FederationPolicyPBImpl extends FederationPolicy {
 
   @Override
   public String getType() {
-    FederationPolicyProtoOrBuilder p = viaProto ? proto : builder;
+    FederationPolicyConfigurationProtoOrBuilder p = viaProto ? proto : builder;
     return p.getType();
   }
 
@@ -100,7 +100,7 @@ public class FederationPolicyPBImpl extends FederationPolicy {
 
   @Override
   public ByteBuffer getParams() {
-    FederationPolicyProtoOrBuilder p = viaProto ? proto : builder;
+    FederationPolicyConfigurationProtoOrBuilder p = viaProto ? proto : builder;
     return ProtoUtils.convertFromProtoFormat(p.getParams());
   }
 

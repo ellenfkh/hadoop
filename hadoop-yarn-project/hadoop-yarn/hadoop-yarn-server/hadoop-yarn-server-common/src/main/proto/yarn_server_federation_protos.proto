@@ -96,23 +96,23 @@ message FederationDeleteApplicationRequestProto {
 message FederationDeleteApplicationResponseProto {
 }
 
-message FederationPolicyProto {
+message FederationPolicyConfigurationProto {
   optional string type = 1;
   optional bytes params = 2;
 }
 
-message GetFederationPolicyRequestProto {
+message GetFederationPolicyConfigurationRequestProto {
   optional string queue = 1;
 }
 
-message GetFederationPolicyResponseProto {
-  optional FederationPolicyProto policy = 1;
+message GetFederationPolicyConfigurationResponseProto {
+  optional FederationPolicyConfigurationProto policy = 1;
 }
 
-message SetFederationPolicyRequestProto {
+message SetFederationPolicyConfigurationRequestProto {
   optional string queue = 1;
-  optional FederationPolicyProto policy = 2;
+  optional FederationPolicyConfigurationProto policy = 2;
 }
 
-message SetFederationPolicyResponseProto {
+message SetFederationPolicyConfigurationResponseProto {
 }

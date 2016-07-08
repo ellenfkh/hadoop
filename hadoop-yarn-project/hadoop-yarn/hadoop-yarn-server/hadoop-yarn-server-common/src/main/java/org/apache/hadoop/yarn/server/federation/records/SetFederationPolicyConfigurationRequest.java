@@ -23,23 +23,40 @@ import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.util.Records;
 
 /**
- * GetFederationPolicyResponse contains the answer from the {@code
- * FederationPolicyStore} to a request to get the information about {@link
- * FederationPolicy}, which represents the distribution of his resources across
- * sub-clusters.
+ * UpdateFederationPolicyRequest is a request to the
+ * {@code FederationPolicyStore} to update the information about the
+ * distribution of resources across sub-clusters, i.e. the
+ * {@link FederationPolicyConfiguration} for the specified queue.
  */
 @Public
 @Unstable
-public abstract class GetFederationPolicyResponse {
-
+public abstract class SetFederationPolicyConfigurationRequest {
   @Private
   @Unstable
-  public GetFederationPolicyResponse newInstance(FederationPolicy policy) {
-    GetFederationPolicyResponse response =
-        Records.newRecord(GetFederationPolicyResponse.class);
-    response.setPolicy(policy);
-    return response;
+  public SetFederationPolicyConfigurationRequest newInstance(FederationPolicyConfiguration policy) {
+    SetFederationPolicyConfigurationRequest request =
+        Records.newRecord(SetFederationPolicyConfigurationRequest.class);
+    request.setPolicy(policy);
+    return request;
   }
+
+  /**
+   * Get the name of the queue whose policy is required.
+   *
+   * @return the name of the queue
+   */
+  @Public
+  @Unstable
+  public abstract String getQueue();
+
+  /**
+   * Sets the name of the queue whose policy is required.
+   *
+   * @param queueName the name of the queue
+   */
+  @Private
+  @Unstable
+  public abstract void setQueue(String queueName);
 
   /**
    * Get the policy which represents the distribution of his resources across
@@ -49,7 +66,7 @@ public abstract class GetFederationPolicyResponse {
    */
   @Public
   @Unstable
-  public abstract FederationPolicy getPolicy();
+  public abstract FederationPolicyConfiguration getPolicy();
 
   /**
    * Sets the policy which represents the distribution of his resources across
@@ -59,6 +76,5 @@ public abstract class GetFederationPolicyResponse {
    */
   @Private
   @Unstable
-  public abstract void setPolicy(FederationPolicy policy);
-
+  public abstract void setPolicy(FederationPolicyConfiguration policy);
 }

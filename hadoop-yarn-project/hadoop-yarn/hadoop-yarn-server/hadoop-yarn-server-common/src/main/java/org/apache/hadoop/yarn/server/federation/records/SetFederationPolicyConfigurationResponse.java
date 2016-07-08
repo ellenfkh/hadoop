@@ -30,8 +30,8 @@ import org.apache.hadoop.yarn.util.Records;
  */
 @Public
 @Unstable
-public abstract class SetFederationPolicyResponse {
-  public SetFederationPolicyResponse newInstance() {
-    return Records.newRecord(SetFederationPolicyResponse.class);
+public abstract class SetFederationPolicyConfigurationResponse {
+  public SetFederationPolicyConfigurationResponse newInstance() {
+    return Records.newRecord(SetFederationPolicyConfigurationResponse.class);
   }
 }

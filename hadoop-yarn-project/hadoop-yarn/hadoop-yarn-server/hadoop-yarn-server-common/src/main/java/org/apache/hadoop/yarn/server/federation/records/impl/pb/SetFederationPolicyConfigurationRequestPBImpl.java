@@ -20,38 +20,39 @@ package org.apache.hadoop.yarn.server.federation.records.impl.pb;
 import com.google.protobuf.TextFormat;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.SetFederationPolicyRequestProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.SetFederationPolicyRequestProtoOrBuilder;
-import org.apache.hadoop.yarn.server.federation.records.FederationPolicy;
-import org.apache.hadoop.yarn.server.federation.records.SetFederationPolicyRequest;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationProto;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.SetFederationPolicyConfigurationRequestProto;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.SetFederationPolicyConfigurationRequestProtoOrBuilder;
+import org.apache.hadoop.yarn.server.federation.records.FederationPolicyConfiguration;
+import org.apache.hadoop.yarn.server.federation.records.SetFederationPolicyConfigurationRequest;
 
 /**
- * Protocol buffer based implementation of {@link SetFederationPolicyRequest}.
+ * Protocol buffer based implementation of {@link SetFederationPolicyConfigurationRequest}.
  */
 @Private
 @Unstable
-public class SetFederationPolicyRequestPBImpl
-    extends SetFederationPolicyRequest {
+public class SetFederationPolicyConfigurationRequestPBImpl
+    extends SetFederationPolicyConfigurationRequest {
 
-  private SetFederationPolicyRequestProto proto =
-      SetFederationPolicyRequestProto.getDefaultInstance();
-  private SetFederationPolicyRequestProto.Builder builder = null;
+  private SetFederationPolicyConfigurationRequestProto proto =
+      SetFederationPolicyConfigurationRequestProto.getDefaultInstance();
+  private SetFederationPolicyConfigurationRequestProto.Builder builder = null;
   private boolean viaProto = false;
 
-  private FederationPolicy federationPolicy = null;
+  private FederationPolicyConfiguration federationPolicy = null;
+  
 
-  public SetFederationPolicyRequestPBImpl() {
-    builder = SetFederationPolicyRequestProto.newBuilder();
+  public SetFederationPolicyConfigurationRequestPBImpl() {
+    builder = SetFederationPolicyConfigurationRequestProto.newBuilder();
   }
 
-  public SetFederationPolicyRequestPBImpl(
-      SetFederationPolicyRequestProto proto) {
+  public SetFederationPolicyConfigurationRequestPBImpl(
+      SetFederationPolicyConfigurationRequestProto proto) {
     this.proto = proto;
     viaProto = true;
   }
 
-  public SetFederationPolicyRequestProto getProto() {
+  public SetFederationPolicyConfigurationRequestProto getProto() {
     mergeLocalToProto();
     proto = viaProto ? proto : builder.build();
     viaProto = true;
@@ -69,14 +70,14 @@ public class SetFederationPolicyRequestPBImpl
 
   private void maybeInitBuilder() {
     if (viaProto || builder == null) {
-      builder = SetFederationPolicyRequestProto.newBuilder(proto);
+      builder = SetFederationPolicyConfigurationRequestProto.newBuilder(proto);
     }
     viaProto = false;
   }
 
   private void mergeLocalToBuilder() {
     if (this.federationPolicy != null
-        && !((FederationPolicyPBImpl) this.federationPolicy).getProto()
+        && !((FederationPolicyConfigurationPBImpl) this.federationPolicy).getProto()
         .equals(builder.getPolicy())) {
       builder.setPolicy(convertToProtoFormat(this.federationPolicy));
     }
@@ -105,7 +106,7 @@ public class SetFederationPolicyRequestPBImpl
 
   @Override
   public String getQueue() {
-    SetFederationPolicyRequestProtoOrBuilder p = viaProto ? proto : builder;
+    SetFederationPolicyConfigurationRequestProtoOrBuilder p = viaProto ? proto : builder;
     return p.getQueue();
   }
 
@@ -120,8 +121,8 @@ public class SetFederationPolicyRequestPBImpl
   }
 
   @Override
-  public FederationPolicy getPolicy() {
-    SetFederationPolicyRequestProtoOrBuilder p = viaProto ? proto : builder;
+  public FederationPolicyConfiguration getPolicy() {
+    SetFederationPolicyConfigurationRequestProtoOrBuilder p = viaProto ? proto : builder;
     if (this.federationPolicy != null) {
       return this.federationPolicy;
     }
@@ -133,7 +134,7 @@ public class SetFederationPolicyRequestPBImpl
   }
 
   @Override
-  public void setPolicy(FederationPolicy policy) {
+  public void setPolicy(FederationPolicyConfiguration policy) {
     maybeInitBuilder();
     if (policy == null) {
       builder.clearPolicy();
@@ -141,12 +142,12 @@ public class SetFederationPolicyRequestPBImpl
     this.federationPolicy = policy;
   }
 
-  private FederationPolicy convertFromProtoFormat(
-      FederationPolicyProto policy) {
-    return new FederationPolicyPBImpl(policy);
+  private FederationPolicyConfiguration convertFromProtoFormat(
+      FederationPolicyConfigurationProto policy) {
+    return new FederationPolicyConfigurationPBImpl(policy);
   }
 
-  private FederationPolicyProto convertToProtoFormat(FederationPolicy policy) {
-    return ((FederationPolicyPBImpl) policy).getProto();
+  private FederationPolicyConfigurationProto convertToProtoFormat(FederationPolicyConfiguration policy) {
+    return ((FederationPolicyConfigurationPBImpl) policy).getProto();
   }
 }

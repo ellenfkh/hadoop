@@ -23,19 +23,19 @@ import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.util.Records;
 
 /**
- * GetFederationPolicyRequest is a request to the {@code FederationPolicyStore}
+ * GetFederationPolicyConfigurationRequest is a request to the {@code FederationPolicyStore}
  * to get the information about the distribution of resources across
- * sub-clusters, i.e. the {@link FederationPolicy} for the specified queue.
+ * sub-clusters, i.e. the {@link FederationPolicyConfiguration} for the specified queue.
  */
 @Public
 @Unstable
-public abstract class GetFederationPolicyRequest {
+public abstract class GetFederationPolicyConfigurationRequest {
 
   @Private
   @Unstable
-  public GetFederationPolicyRequest newInstance(String queueName) {
-    GetFederationPolicyRequest request =
-        Records.newRecord(GetFederationPolicyRequest.class);
+  public GetFederationPolicyConfigurationRequest newInstance(String queueName) {
+    GetFederationPolicyConfigurationRequest request =
+        Records.newRecord(GetFederationPolicyConfigurationRequest.class);
     request.setQueue(queueName);
     return request;
   }

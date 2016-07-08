@@ -20,34 +20,34 @@ package org.apache.hadoop.yarn.server.federation.records.impl.pb;
 import com.google.protobuf.TextFormat;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyRequestProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyRequestProtoOrBuilder;
-import org.apache.hadoop.yarn.server.federation.records.GetFederationPolicyRequest;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyConfigurationRequestProto;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyConfigurationRequestProtoOrBuilder;
+import org.apache.hadoop.yarn.server.federation.records.GetFederationPolicyConfigurationRequest;
 
 /**
- * Protocol buffer based implementation of {@link GetFederationPolicyRequest}.
+ * Protocol buffer based implementation of {@link GetFederationPolicyConfigurationRequest}.
  */
 @Private
 @Unstable
-public class GetFederationPolicyRequestPBImpl
-    extends GetFederationPolicyRequest {
+public class GetFederationPolicyConfigurationRequestPBImpl
+    extends GetFederationPolicyConfigurationRequest {
 
-  private GetFederationPolicyRequestProto proto =
-      GetFederationPolicyRequestProto.getDefaultInstance();
-  private GetFederationPolicyRequestProto.Builder builder = null;
+  private GetFederationPolicyConfigurationRequestProto proto =
+      GetFederationPolicyConfigurationRequestProto.getDefaultInstance();
+  private GetFederationPolicyConfigurationRequestProto.Builder builder = null;
   private boolean viaProto = false;
 
-  public GetFederationPolicyRequestPBImpl() {
-    builder = GetFederationPolicyRequestProto.newBuilder();
+  public GetFederationPolicyConfigurationRequestPBImpl() {
+    builder = GetFederationPolicyConfigurationRequestProto.newBuilder();
   }
 
-  public GetFederationPolicyRequestPBImpl(
-      GetFederationPolicyRequestProto proto) {
+  public GetFederationPolicyConfigurationRequestPBImpl(
+      GetFederationPolicyConfigurationRequestProto proto) {
     this.proto = proto;
     viaProto = true;
   }
 
-  public GetFederationPolicyRequestProto getProto() {
+  public GetFederationPolicyConfigurationRequestProto getProto() {
     proto = viaProto ? proto : builder.build();
     viaProto = true;
     return proto;
@@ -55,7 +55,7 @@ public class GetFederationPolicyRequestPBImpl
 
   private void maybeInitBuilder() {
     if (viaProto || builder == null) {
-      builder = GetFederationPolicyRequestProto.newBuilder(proto);
+      builder = GetFederationPolicyConfigurationRequestProto.newBuilder(proto);
     }
     viaProto = false;
   }
@@ -83,7 +83,7 @@ public class GetFederationPolicyRequestPBImpl
 
   @Override
   public String getQueue() {
-    GetFederationPolicyRequestProtoOrBuilder p = viaProto ? proto : builder;
+    GetFederationPolicyConfigurationRequestProtoOrBuilder p = viaProto ? proto : builder;
     return p.getQueue();
   }
 
