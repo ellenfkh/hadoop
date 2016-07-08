@@ -95,3 +95,24 @@ message FederationDeleteApplicationRequestProto {
 
 message FederationDeleteApplicationResponseProto {
 }
+
+message FederationPolicyProto {
+  optional string type = 1;
+  optional bytes params = 2;
+}
+
+message GetFederationPolicyRequestProto {
+  optional string queue = 1;
+}
+
+message GetFederationPolicyResponseProto {
+  optional FederationPolicyProto policy = 1;
+}
+
+message SetFederationPolicyRequestProto {
+  optional string queue = 1;
+  optional FederationPolicyProto policy = 2;
+}
+
+message SetFederationPolicyResponseProto {
+}
