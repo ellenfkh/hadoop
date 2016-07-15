@@ -25,9 +25,12 @@ import org.apache.hadoop.yarn.util.Records;
 import java.nio.ByteBuffer;
 
 /**
- * FederationPolicy is a representation of the user resources that have been
- * reserved in a sub-cluster. Currently it is encapsulated as a type name and a
- * byte array.
+ * FederationPolicyConfiguration is a class that represent a configuration of a
+ * policy. It contains a policy type and its param.
+ *
+ * Note: by design the params are an opaque ByteBuffer, that allows for enough
+ * flexibility to evolve the policies without impacting the protocols to/from
+ * the federation state store.
  */
 @Public
 @Unstable
