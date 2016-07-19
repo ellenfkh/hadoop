@@ -23,20 +23,20 @@ import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.util.Records;
 
 /**
- * GetFederationPolicyConfigurationRequest is a request to the {@code FederationPolicyStore}
- * to get the information about the distribution of resources across
- * sub-clusters, i.e. the {@link FederationPolicyConfiguration} for the specified queue.
+ * UpdateFederationPolicyRequest is a request to the
+ * {@code FederationPolicyStore} to update the information about the
+ * distribution of resources across sub-clusters, i.e. the
+ * {@link FederationPolicyConfiguration} for the specified queue.
  */
 @Public
 @Unstable
-public abstract class GetFederationPolicyConfigurationRequest {
-
+public abstract class FederationPolicyConfigurationSetRequest {
   @Private
   @Unstable
-  public GetFederationPolicyConfigurationRequest newInstance(String queueName) {
-    GetFederationPolicyConfigurationRequest request =
-        Records.newRecord(GetFederationPolicyConfigurationRequest.class);
-    request.setQueue(queueName);
+  public FederationPolicyConfigurationSetRequest newInstance(FederationPolicyConfiguration policy) {
+    FederationPolicyConfigurationSetRequest request =
+        Records.newRecord(FederationPolicyConfigurationSetRequest.class);
+    request.setPolicy(policy);
     return request;
   }
 
@@ -57,4 +57,24 @@ public abstract class GetFederationPolicyConfigurationRequest {
   @Private
   @Unstable
   public abstract void setQueue(String queueName);
+
+  /**
+   * Get the policy which represents the distribution of his resources across
+   * sub-clusters.
+   *
+   * @return the policy for the specified queue
+   */
+  @Public
+  @Unstable
+  public abstract FederationPolicyConfiguration getPolicy();
+
+  /**
+   * Sets the policy which represents the distribution of his resources across
+   * sub-clusters.
+   *
+   * @param policy the policy for the specified queue
+   */
+  @Private
+  @Unstable
+  public abstract void setPolicy(FederationPolicyConfiguration policy);
 }

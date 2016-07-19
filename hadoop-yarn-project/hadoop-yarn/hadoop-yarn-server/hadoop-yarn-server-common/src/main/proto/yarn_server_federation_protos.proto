@@ -101,18 +101,18 @@ message FederationPolicyConfigurationProto {
   optional bytes params = 2;
 }
 
-message GetFederationPolicyConfigurationRequestProto {
+message FederationPolicyConfigurationGetRequestProto {
   optional string queue = 1;
 }
 
-message GetFederationPolicyConfigurationResponseProto {
+message FederationPolicyConfigurationGetResponseProto {
   optional FederationPolicyConfigurationProto policy = 1;
 }
 
-message SetFederationPolicyConfigurationRequestProto {
+message FederationPolicyConfigurationSetRequestProto {
   optional string queue = 1;
   optional FederationPolicyConfigurationProto policy = 2;
 }
 
-message SetFederationPolicyConfigurationResponseProto {
+message FederationPolicyConfigurationSetResponseProto {
 }

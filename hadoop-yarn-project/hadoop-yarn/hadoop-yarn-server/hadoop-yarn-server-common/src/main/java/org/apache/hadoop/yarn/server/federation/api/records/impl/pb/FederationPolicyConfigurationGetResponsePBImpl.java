@@ -17,41 +17,43 @@
 
 package org.apache.hadoop.yarn.server.federation.api.records.impl.pb;
 
-import com.google.protobuf.TextFormat;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationGetResponseProto;
+import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationGetResponseProtoOrBuilder;
 import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.FederationPolicyConfigurationProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyConfigurationResponseProto;
-import org.apache.hadoop.yarn.federation.proto.YarnServerFederationProtos.GetFederationPolicyConfigurationResponseProtoOrBuilder;
 import org.apache.hadoop.yarn.server.federation.api.records.FederationPolicyConfiguration;
-import org.apache.hadoop.yarn.server.federation.api.records.GetFederationPolicyConfigurationResponse;
+import org.apache.hadoop.yarn.server.federation.api.records.FederationPolicyConfigurationGetResponse;
+
+import com.google.protobuf.TextFormat;
 
 /**
- * Protocol buffer based implementation of {@link GetFederationPolicyConfigurationResponse}.
+ * Protocol buffer based implementation of
+ * {@link FederationPolicyConfigurationGetResponse}.
  */
 @Private
 @Unstable
-public class GetFederationPolicyConfigurationResponsePBImpl
-    extends GetFederationPolicyConfigurationResponse {
+public class FederationPolicyConfigurationGetResponsePBImpl
+    extends FederationPolicyConfigurationGetResponse {
 
-  private GetFederationPolicyConfigurationResponseProto proto =
-      GetFederationPolicyConfigurationResponseProto.getDefaultInstance();
-  private GetFederationPolicyConfigurationResponseProto.Builder builder = null;
+  private FederationPolicyConfigurationGetResponseProto proto =
+      FederationPolicyConfigurationGetResponseProto.getDefaultInstance();
+  private FederationPolicyConfigurationGetResponseProto.Builder builder = null;
   private boolean viaProto = false;
 
   private FederationPolicyConfiguration federationPolicy = null;
 
-  public GetFederationPolicyConfigurationResponsePBImpl() {
-    builder = GetFederationPolicyConfigurationResponseProto.newBuilder();
+  public FederationPolicyConfigurationGetResponsePBImpl() {
+    builder = FederationPolicyConfigurationGetResponseProto.newBuilder();
   }
 
-  public GetFederationPolicyConfigurationResponsePBImpl(
-      GetFederationPolicyConfigurationResponseProto proto) {
+  public FederationPolicyConfigurationGetResponsePBImpl(
+      FederationPolicyConfigurationGetResponseProto proto) {
     this.proto = proto;
     viaProto = true;
   }
 
-  public GetFederationPolicyConfigurationResponseProto getProto() {
+  public FederationPolicyConfigurationGetResponseProto getProto() {
     mergeLocalToProto();
     proto = viaProto ? proto : builder.build();
     viaProto = true;
@@ -68,15 +70,15 @@ public class GetFederationPolicyConfigurationResponsePBImpl
 
   private void maybeInitBuilder() {
     if (viaProto || builder == null) {
-      builder = GetFederationPolicyConfigurationResponseProto.newBuilder(proto);
+      builder = FederationPolicyConfigurationGetResponseProto.newBuilder(proto);
     }
     viaProto = false;
   }
 
   private void mergeLocalToBuilder() {
     if (this.federationPolicy != null
-        && !((FederationPolicyConfigurationPBImpl) this.federationPolicy).getProto()
-        .equals(builder.getPolicy())) {
+        && !((FederationPolicyConfigurationPBImpl) this.federationPolicy)
+            .getProto().equals(builder.getPolicy())) {
       builder.setPolicy(convertToProtoFormat(this.federationPolicy));
     }
   }
@@ -104,7 +106,8 @@ public class GetFederationPolicyConfigurationResponsePBImpl
 
   @Override
   public FederationPolicyConfiguration getPolicy() {
-    GetFederationPolicyConfigurationResponseProtoOrBuilder p = viaProto ? proto : builder;
+    FederationPolicyConfigurationGetResponseProtoOrBuilder p =
+        viaProto ? proto : builder;
     if (this.federationPolicy != null) {
       return this.federationPolicy;
     }
@@ -129,7 +132,8 @@ public class GetFederationPolicyConfigurationResponsePBImpl
     return new FederationPolicyConfigurationPBImpl(policy);
   }
 
-  private FederationPolicyConfigurationProto convertToProtoFormat(FederationPolicyConfiguration policy) {
+  private FederationPolicyConfigurationProto convertToProtoFormat(
+      FederationPolicyConfiguration policy) {
     return ((FederationPolicyConfigurationPBImpl) policy).getProto();
   }
 

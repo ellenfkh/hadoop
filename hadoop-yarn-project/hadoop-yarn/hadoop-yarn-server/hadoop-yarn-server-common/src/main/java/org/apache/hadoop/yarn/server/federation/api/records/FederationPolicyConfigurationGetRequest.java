@@ -23,42 +23,38 @@ import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.util.Records;
 
 /**
- * GetFederationPolicyConfigurationResponse contains the answer from the {@code
- * FederationPolicyStore} to a request to get the information about {@link
- * FederationPolicyConfiguration}, which represents the distribution of his resources across
- * sub-clusters.
+ * FederationPolicyConfigurationGetRequest is a request to the {@code FederationPolicyStore}
+ * to get the information about the distribution of resources across
+ * sub-clusters, i.e. the {@link FederationPolicyConfiguration} for the specified queue.
  */
 @Public
 @Unstable
-public abstract class GetFederationPolicyConfigurationResponse {
+public abstract class FederationPolicyConfigurationGetRequest {
 
   @Private
   @Unstable
-  public GetFederationPolicyConfigurationResponse newInstance(FederationPolicyConfiguration policy) {
-    GetFederationPolicyConfigurationResponse response =
-        Records.newRecord(GetFederationPolicyConfigurationResponse.class);
-    response.setPolicy(policy);
-    return response;
+  public FederationPolicyConfigurationGetRequest newInstance(String queueName) {
+    FederationPolicyConfigurationGetRequest request =
+        Records.newRecord(FederationPolicyConfigurationGetRequest.class);
+    request.setQueue(queueName);
+    return request;
   }
 
   /**
-   * Get the policy which represents the distribution of his resources across
-   * sub-clusters.
+   * Get the name of the queue whose policy is required.
    *
-   * @return the policy for the specified queue
+   * @return the name of the queue
    */
   @Public
   @Unstable
-  public abstract FederationPolicyConfiguration getPolicy();
+  public abstract String getQueue();
 
   /**
-   * Sets the policy which represents the distribution of his resources across
-   * sub-clusters.
+   * Sets the name of the queue whose policy is required.
    *
-   * @param policy the policy for the specified queue
+   * @param queueName the name of the queue
    */
   @Private
   @Unstable
-  public abstract void setPolicy(FederationPolicyConfiguration policy);
-
+  public abstract void setQueue(String queueName);
 }
