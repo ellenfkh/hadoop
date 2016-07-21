@@ -24,9 +24,9 @@ import org.apache.hadoop.yarn.util.Records;
 
 /**
  * FederationPolicyConfigurationGetResponse contains the answer from the {@code
- * FederationPolicyStore} to a request to get the information about {@link
- * FederationPolicyConfiguration}, which represents the distribution of his resources across
- * sub-clusters.
+ * FederationPolicyStore} to a request to get the information about
+ * {@link FederationPolicyConfiguration}, which represents the distribution of
+ * his resources across sub-clusters.
  */
 @Public
 @Unstable
@@ -34,7 +34,8 @@ public abstract class FederationPolicyConfigurationGetResponse {
 
   @Private
   @Unstable
-  public FederationPolicyConfigurationGetResponse newInstance(FederationPolicyConfiguration policy) {
+  public static FederationPolicyConfigurationGetResponse newInstance(
+      FederationPolicyConfiguration policy) {
     FederationPolicyConfigurationGetResponse response =
         Records.newRecord(FederationPolicyConfigurationGetResponse.class);
     response.setPolicy(policy);

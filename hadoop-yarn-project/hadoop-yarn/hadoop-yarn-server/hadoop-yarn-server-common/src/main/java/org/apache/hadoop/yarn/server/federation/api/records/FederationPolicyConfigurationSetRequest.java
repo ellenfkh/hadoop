@@ -33,9 +33,11 @@ import org.apache.hadoop.yarn.util.Records;
 public abstract class FederationPolicyConfigurationSetRequest {
   @Private
   @Unstable
-  public FederationPolicyConfigurationSetRequest newInstance(FederationPolicyConfiguration policy) {
+  public static FederationPolicyConfigurationSetRequest newInstance(
+      String queue, FederationPolicyConfiguration policy) {
     FederationPolicyConfigurationSetRequest request =
         Records.newRecord(FederationPolicyConfigurationSetRequest.class);
+    request.setQueue(queue);
     request.setPolicy(policy);
     return request;
   }
