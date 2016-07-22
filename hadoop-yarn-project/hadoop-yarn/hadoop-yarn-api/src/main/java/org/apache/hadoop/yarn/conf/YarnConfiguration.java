@@ -2619,6 +2619,9 @@ public class YarnConfiguration extends Configuration {
   public static final String TIMELINE_XFS_OPTIONS =
       TIMELINE_XFS_PREFIX + "xframe-options";
 
+  public static final String FEDERATION_MACHINE_LIST = YARN_PREFIX +
+      "federation.machine-list";
+
   public YarnConfiguration() {
     super();
   }
