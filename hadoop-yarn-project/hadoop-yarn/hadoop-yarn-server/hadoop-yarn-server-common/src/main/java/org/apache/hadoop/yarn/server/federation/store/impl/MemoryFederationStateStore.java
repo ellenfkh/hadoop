@@ -20,14 +20,26 @@ package org.apache.hadoop.yarn.server.federation.store.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterId;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterInfo;
+import org.apache.hadoop.yarn.server.federation.store.FederationApplicationHomeSubClusterStore;
 import org.apache.hadoop.yarn.server.federation.store.FederationMembershipStateStore;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterDeregisterRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterDeregisterResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.AddApplicationHomeSubClusterRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.AddApplicationHomeSubClusterResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.ApplicationHomeSubCluster;
+import org.apache.hadoop.yarn.server.federation.store.records.DeleteApplicationHomeSubClusterRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.DeleteApplicationHomeSubClusterResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.GetApplicationHomeSubClusterRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.GetApplicationHomeSubClusterResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.GetApplicationsHomeSubClusterRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.GetApplicationsHomeSubClusterResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterInfoRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterInfoResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClustersInfoRequest;
@@ -36,25 +48,34 @@ import org.apache.hadoop.yarn.server.federation.store.records.SubClusterHeartbea
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterHeartbeatResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterRegisterRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterRegisterResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.UpdateApplicationHomeSubClusterRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.UpdateApplicationHomeSubClusterResponse;
 import org.apache.hadoop.yarn.server.records.Version;
 import org.apache.hadoop.yarn.util.MonotonicClock;
 
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * In-memory implementation of FederationMembershipStateStore.
+ * In-memory implementation of FederationMembershipStateStore and
+ * FederationApplicationHomeSubClusterStore.
  */
-public class MemoryFederationStateStore
-    implements FederationMembershipStateStore {
+public class MemoryFederationStateStore implements
+    FederationMembershipStateStore, FederationApplicationHomeSubClusterStore {
 
   private final Map<SubClusterId, SubClusterInfo> membership =
       new ConcurrentHashMap<SubClusterId, SubClusterInfo>();
+
+  private final Map<ApplicationId, SubClusterId> applications =
+      new ConcurrentHashMap<ApplicationId, SubClusterId>();
+
   private final MonotonicClock clock = new MonotonicClock();
 
   @Override
   public Version getMembershipStateStoreVersion() {
     return null;
   }
+
+  ///// FederationMembershipStateStore APIs
 
   @Override
   public SubClusterRegisterResponse registerSubCluster(
@@ -125,6 +146,87 @@ public class MemoryFederationStateStore
 
   }
 
+  ///// FederationApplicationHomeSubClusterStore APIs
+
+  @Override
+  public Version getApplicationStateStoreVersion() {
+    return null;
+  }
+
+  @Override
+  public AddApplicationHomeSubClusterResponse addApplicationHomeSubClusterMap(
+      AddApplicationHomeSubClusterRequest request) throws YarnException {
+    ApplicationId appId =
+        request.getApplicationHomeSubCluster().getApplicationId();
+    if (applications.containsKey(appId)) {
+      throw new YarnException(
+          "Application " + appId.toString() + " already exists");
+    }
+
+    applications.put(appId,
+        request.getApplicationHomeSubCluster().getHomeSubCluster());
+    return AddApplicationHomeSubClusterResponse.newInstance();
+  }
+
+  @Override
+  public UpdateApplicationHomeSubClusterResponse updateApplicationHomeSubClusterMap(
+      UpdateApplicationHomeSubClusterRequest request) throws YarnException {
+    ApplicationId appId =
+        request.getApplicationHomeSubCluster().getApplicationId();
+    if (!applications.containsKey(appId)) {
+      throw new YarnException("Application " + appId.toString() + " not found");
+    }
+
+    applications.put(appId,
+        request.getApplicationHomeSubCluster().getHomeSubCluster());
+    return UpdateApplicationHomeSubClusterResponse.newInstance();
+  }
+
+  @Override
+  public GetApplicationHomeSubClusterResponse getApplicationHomeSubClusterMap(
+      GetApplicationHomeSubClusterRequest request) throws YarnException {
+    ApplicationId appId = request.getApplicationId();
+
+    if (appId == null) {
+      throw new YarnException("appId is null");
+    }
+    if (!applications.containsKey(appId)) {
+      throw new YarnException("Application " + appId.toString() + " not found");
+    }
+
+    ApplicationHomeSubCluster appHomeSubCluster =
+        ApplicationHomeSubCluster.newInstance(appId, applications.get(appId));
+    return GetApplicationHomeSubClusterResponse.newInstance(appHomeSubCluster);
+  }
+
+  @Override
+  public GetApplicationsHomeSubClusterResponse getApplicationsHomeSubClusterMap(
+      GetApplicationsHomeSubClusterRequest request) throws YarnException {
+    List<ApplicationHomeSubCluster> result =
+        new ArrayList<ApplicationHomeSubCluster>();
+
+    for (Entry<ApplicationId, SubClusterId> e : applications.entrySet()) {
+      result
+          .add(ApplicationHomeSubCluster.newInstance(e.getKey(), e.getValue()));
+    }
+
+    return GetApplicationsHomeSubClusterResponse.newInstance(result);
+  }
+
+  @Override
+  public DeleteApplicationHomeSubClusterResponse deleteApplicationHomeSubClusterMap(
+      DeleteApplicationHomeSubClusterRequest request) throws YarnException {
+    ApplicationId appId = request.getApplicationId();
+    if (!applications.containsKey(appId)) {
+      throw new YarnException("Application " + appId.toString() + " not found");
+    }
+
+    applications.remove(appId);
+    return DeleteApplicationHomeSubClusterResponse.newInstance();
+  }
+
+  ///// Test convenience methods
+
   @VisibleForTesting
   public Map<SubClusterId, SubClusterInfo> getMembershipTable() {
     return membership;
@@ -135,4 +237,13 @@ public class MemoryFederationStateStore
     membership.clear();
   }
 
+  @VisibleForTesting
+  public Map<ApplicationId, SubClusterId> getApplicationsTable() {
+    return applications;
+  }
+
+  @VisibleForTesting
+  public void clearApplicationsTable() {
+    applications.clear();
+  }
 }

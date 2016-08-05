@@ -19,6 +19,8 @@ package org.apache.hadoop.yarn.server.federation.store.impl;
 
 import java.util.Map;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.server.federation.store.FederationApplicationHomeSubClusterStore;
 import org.apache.hadoop.yarn.server.federation.store.FederationMembershipStateStore;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterId;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterInfo;
@@ -43,7 +45,22 @@ public class TestMemoryFederationStateStore
   }
 
   @Override
-  protected FederationMembershipStateStore getStateStore() {
+  protected FederationMembershipStateStore getMembershipStateStore() {
     return STATESTORE;
+  }
+
+  @Override
+  protected FederationApplicationHomeSubClusterStore getApplicationStateStore() {
+    return STATESTORE;
+  }
+
+  @Override
+  protected Map<ApplicationId, SubClusterId> getApplications() {
+    return STATESTORE.getApplicationsTable();
+  }
+
+  @Override
+  protected void clearApplications() {
+    STATESTORE.clearApplicationsTable();
   }
 }
