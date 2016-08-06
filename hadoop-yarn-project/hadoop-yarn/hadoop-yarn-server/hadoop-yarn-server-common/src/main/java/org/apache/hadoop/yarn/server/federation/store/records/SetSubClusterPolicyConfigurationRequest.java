@@ -32,10 +32,11 @@ import org.apache.hadoop.yarn.util.Records;
 public abstract class SetSubClusterPolicyConfigurationRequest {
   @Private
   @Unstable
-  public SetSubClusterPolicyConfigurationRequest newInstance(
-      SubClusterPolicyConfiguration policy) {
+  public static SetSubClusterPolicyConfigurationRequest newInstance(
+      String queueName, SubClusterPolicyConfiguration policy) {
     SetSubClusterPolicyConfigurationRequest request =
         Records.newRecord(SetSubClusterPolicyConfigurationRequest.class);
+    request.setQueue(queueName);
     request.setPolicyConfiguration(policy);
     return request;
   }

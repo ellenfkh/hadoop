@@ -27,6 +27,7 @@ import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterPolic
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterPolicyConfigurationResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.SetSubClusterPolicyConfigurationRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.SetSubClusterPolicyConfigurationResponse;
+import org.apache.hadoop.yarn.server.records.Version;
 
 /**
  * The FederationPolicyStore provides a key-value interface to access the
@@ -39,6 +40,12 @@ import org.apache.hadoop.yarn.server.federation.store.records.SetSubClusterPolic
 @Private
 @Unstable
 public interface FederationPolicyStore {
+  /**
+   * Get the {@link Version} of the underlying federation policy store.
+   *
+   * @return the {@link Version} of the underlying federation membership store
+   */
+  Version getPolicyStoreVersion();
 
   /**
    * Get the policy configuration for a given queue.

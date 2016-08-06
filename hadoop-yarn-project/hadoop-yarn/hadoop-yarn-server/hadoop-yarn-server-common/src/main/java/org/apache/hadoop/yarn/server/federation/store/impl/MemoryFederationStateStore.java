@@ -27,8 +27,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterId;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterInfo;
-import org.apache.hadoop.yarn.server.federation.store.FederationApplicationHomeSubClusterStore;
-import org.apache.hadoop.yarn.server.federation.store.FederationMembershipStateStore;
+import org.apache.hadoop.yarn.server.federation.store.records.SubClusterPolicyConfiguration;
+import org.apache.hadoop.yarn.server.federation.store.FederationStore;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterDeregisterRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterDeregisterResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.AddApplicationHomeSubClusterRequest;
@@ -42,8 +42,14 @@ import org.apache.hadoop.yarn.server.federation.store.records.GetApplicationsHom
 import org.apache.hadoop.yarn.server.federation.store.records.GetApplicationsHomeSubClusterResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterInfoRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterInfoResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterPoliciesConfigurationsRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterPoliciesConfigurationsResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterPolicyConfigurationRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.GetSubClusterPolicyConfigurationResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClustersInfoRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.GetSubClustersInfoResponse;
+import org.apache.hadoop.yarn.server.federation.store.records.SetSubClusterPolicyConfigurationRequest;
+import org.apache.hadoop.yarn.server.federation.store.records.SetSubClusterPolicyConfigurationResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterHeartbeatRequest;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterHeartbeatResponse;
 import org.apache.hadoop.yarn.server.federation.store.records.SubClusterRegisterRequest;
@@ -59,14 +65,16 @@ import com.google.common.annotations.VisibleForTesting;
  * In-memory implementation of FederationMembershipStateStore and
  * FederationApplicationHomeSubClusterStore.
  */
-public class MemoryFederationStateStore implements
-    FederationMembershipStateStore, FederationApplicationHomeSubClusterStore {
+public class MemoryFederationStateStore implements FederationStore {
 
   private final Map<SubClusterId, SubClusterInfo> membership =
       new ConcurrentHashMap<SubClusterId, SubClusterInfo>();
 
   private final Map<ApplicationId, SubClusterId> applications =
       new ConcurrentHashMap<ApplicationId, SubClusterId>();
+
+  private final Map<String, SubClusterPolicyConfiguration> policies =
+      new ConcurrentHashMap<String, SubClusterPolicyConfiguration>();
 
   private final MonotonicClock clock = new MonotonicClock();
 
@@ -225,6 +233,45 @@ public class MemoryFederationStateStore implements
     return DeleteApplicationHomeSubClusterResponse.newInstance();
   }
 
+  ///// FederationPolicyStore APIs
+
+  @Override
+  public Version getPolicyStoreVersion() {
+    return null;
+  }
+
+  @Override
+  public GetSubClusterPolicyConfigurationResponse getPolicyConfiguration(
+      GetSubClusterPolicyConfigurationRequest request) throws YarnException {
+    String queue = request.getQueue();
+    if (!policies.containsKey(queue)) {
+      throw new YarnException("Policy for queue " + queue + " not found");
+    }
+
+    return GetSubClusterPolicyConfigurationResponse
+        .newInstance(policies.get(queue));
+  }
+
+  @Override
+  public SetSubClusterPolicyConfigurationResponse setPolicyConfiguration(
+      SetSubClusterPolicyConfigurationRequest request) throws YarnException {
+    policies.put(request.getQueue(), request.getPolicyConfiguration());
+    return SetSubClusterPolicyConfigurationResponse.newInstance();
+  }
+
+  @Override
+  public GetSubClusterPoliciesConfigurationsResponse getPoliciesConfigurations(
+      GetSubClusterPoliciesConfigurationsRequest request) throws YarnException {
+    List<SubClusterPolicyConfiguration> result =
+        new ArrayList<SubClusterPolicyConfiguration>();
+
+    for (SubClusterPolicyConfiguration policy : policies.values()) {
+      result.add(policy);
+    }
+
+    return GetSubClusterPoliciesConfigurationsResponse.newInstance(result);
+  }
+
   ///// Test convenience methods
 
   @VisibleForTesting
@@ -245,5 +292,15 @@ public class MemoryFederationStateStore implements
   @VisibleForTesting
   public void clearApplicationsTable() {
     applications.clear();
+  }
+
+  @VisibleForTesting
+  public Map<String, SubClusterPolicyConfiguration> getPoliciesTable() {
+    return policies;
+  }
+
+  @VisibleForTesting
+  public void clearPoliciesTable() {
+    policies.clear();
   }
 }
