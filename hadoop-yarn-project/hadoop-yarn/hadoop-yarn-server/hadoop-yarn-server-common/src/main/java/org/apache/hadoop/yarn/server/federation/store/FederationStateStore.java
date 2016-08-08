@@ -18,6 +18,8 @@
 
 package org.apache.hadoop.yarn.server.federation.store;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.records.Version;
 
 /**
@@ -26,24 +28,37 @@ import org.apache.hadoop.yarn.server.records.Version;
  * {@link FederationMembershipStateStore}, and {@link FederationPolicyStore}.
  *
  */
-public interface FederationStore
+public interface FederationStateStore
     extends FederationApplicationHomeSubClusterStore,
     FederationMembershipStateStore, FederationPolicyStore {
 
   /**
    * Initialize the FederationStore.
-   */
-  void init();
-
-  /**
-   * Close the FederationStore.
-   */
-  void close();
-
-  /**
-   * Get the {@link Version} of the underlying federation store.
    *
-   * @return the {@link Version} of the underlying federation store
+   * @param conf the cluster configuration
+   * @throws YarnException if initialization fails
    */
-  Version getFederationStoreVersion();
+  void init(Configuration conf) throws YarnException;
+
+  /**
+   * Perform any cleanup operations of the StateStore.
+   *
+   * @throws Exception if cleanup fails
+   */
+  void close() throws Exception;
+
+  /**
+   * Get the {@link Version} of the underlying federation state store client.
+   *
+   * @return the {@link Version} of the underlying federation store client
+   */
+  Version getCurrentVersion();
+
+  /**
+   * Load the version information from the federation state store.
+   *
+   * @return the {@link Version} of the federation state store
+   */
+  Version loadVersion();
+
 }
