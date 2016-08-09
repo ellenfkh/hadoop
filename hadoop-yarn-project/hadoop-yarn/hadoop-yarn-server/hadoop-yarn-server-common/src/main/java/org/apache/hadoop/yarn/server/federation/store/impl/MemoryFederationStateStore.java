@@ -61,7 +61,7 @@ import org.apache.hadoop.yarn.server.records.Version;
 import org.apache.hadoop.yarn.util.MonotonicClock;
 
 /**
- * In-memory implementation of {@link FederationStore}.
+ * In-memory implementation of {@link FederationStateStore}.
  */
 public class MemoryFederationStateStore implements FederationStateStore {
 
