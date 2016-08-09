@@ -94,10 +94,7 @@ public abstract class FederationStateStoreBaseTest {
   @Test
   public void testDeregisterSubCluster() throws Exception {
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
-    SubClusterInfo subClusterInfo = createSubClusterInfo(subClusterId);
-
-    stateStore.registerSubCluster(
-        SubClusterRegisterRequest.newInstance(subClusterInfo));
+    registerSubCluster(subClusterId);
 
     SubClusterDeregisterRequest deregisterRequest = SubClusterDeregisterRequest
         .newInstance(subClusterId, SubClusterState.SC_UNREGISTERED);
@@ -127,9 +124,7 @@ public abstract class FederationStateStoreBaseTest {
 
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
     SubClusterInfo subClusterInfo = createSubClusterInfo(subClusterId);
-
-    stateStore.registerSubCluster(
-        SubClusterRegisterRequest.newInstance(subClusterInfo));
+    registerSubCluster(subClusterId);
 
     GetSubClusterInfoRequest request =
         GetSubClusterInfoRequest.newInstance(subClusterId);
@@ -189,10 +184,7 @@ public abstract class FederationStateStoreBaseTest {
   @Test
   public void testSubClusterHeartbeat() throws Exception {
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
-    SubClusterInfo subClusterInfo = createSubClusterInfo(subClusterId);
-
-    stateStore.registerSubCluster(
-        SubClusterRegisterRequest.newInstance(subClusterInfo));
+    registerSubCluster(subClusterId);
 
     SubClusterHeartbeatRequest heartbeatRequest = SubClusterHeartbeatRequest
         .newInstance(subClusterId, SubClusterState.SC_RUNNING, "cabability");
@@ -242,15 +234,11 @@ public abstract class FederationStateStoreBaseTest {
       throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
-    SubClusterId subClusterId2 = SubClusterId.newInstance("SC2");
+    addApplicationHomeSC(appId, subClusterId1);
 
-    ApplicationHomeSubCluster ahsc1 =
-        ApplicationHomeSubCluster.newInstance(appId, subClusterId1);
+    SubClusterId subClusterId2 = SubClusterId.newInstance("SC2");
     ApplicationHomeSubCluster ahsc2 =
         ApplicationHomeSubCluster.newInstance(appId, subClusterId2);
-
-    stateStore.addApplicationHomeSubClusterMap(
-        AddApplicationHomeSubClusterRequest.newInstance(ahsc1));
 
     try {
       stateStore.addApplicationHomeSubClusterMap(
@@ -269,12 +257,7 @@ public abstract class FederationStateStoreBaseTest {
   public void testDeleteApplicationHomeSubClusterMap() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
-    ApplicationHomeSubCluster ahsc =
-        ApplicationHomeSubCluster.newInstance(appId, subClusterId);
-
-    AddApplicationHomeSubClusterRequest addRequest =
-        AddApplicationHomeSubClusterRequest.newInstance(ahsc);
-    stateStore.addApplicationHomeSubClusterMap(addRequest);
+    addApplicationHomeSC(appId, subClusterId);
 
     DeleteApplicationHomeSubClusterRequest delRequest =
         DeleteApplicationHomeSubClusterRequest.newInstance(appId);
@@ -313,17 +296,10 @@ public abstract class FederationStateStoreBaseTest {
   public void testGetApplicationHomeSubClusterMap() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
-    ApplicationHomeSubCluster ahsc =
-        ApplicationHomeSubCluster.newInstance(appId, subClusterId);
-
-    AddApplicationHomeSubClusterRequest addRequest =
-        AddApplicationHomeSubClusterRequest.newInstance(ahsc);
-    stateStore.addApplicationHomeSubClusterMap(addRequest);
+    addApplicationHomeSC(appId, subClusterId);
 
     GetApplicationHomeSubClusterRequest getRequest =
         GetApplicationHomeSubClusterRequest.newInstance(appId);
-
-    Assert.assertNotNull(appId);
 
     GetApplicationHomeSubClusterResponse result =
         stateStore.getApplicationHomeSubClusterMap(getRequest);
@@ -356,18 +332,13 @@ public abstract class FederationStateStoreBaseTest {
     ApplicationHomeSubCluster ahsc1 =
         ApplicationHomeSubCluster.newInstance(appId1, subClusterId1);
 
-    AddApplicationHomeSubClusterRequest addRequest1 =
-        AddApplicationHomeSubClusterRequest.newInstance(ahsc1);
-    stateStore.addApplicationHomeSubClusterMap(addRequest1);
-
     ApplicationId appId2 = ApplicationId.newInstance(1, 2);
     SubClusterId subClusterId2 = SubClusterId.newInstance("SC2");
     ApplicationHomeSubCluster ahsc2 =
         ApplicationHomeSubCluster.newInstance(appId2, subClusterId2);
 
-    AddApplicationHomeSubClusterRequest addRequest2 =
-        AddApplicationHomeSubClusterRequest.newInstance(ahsc2);
-    stateStore.addApplicationHomeSubClusterMap(addRequest2);
+    addApplicationHomeSC(appId1, subClusterId1);
+    addApplicationHomeSC(appId2, subClusterId2);
 
     GetApplicationsHomeSubClusterRequest getRequest =
         GetApplicationsHomeSubClusterRequest.newInstance();
@@ -384,15 +355,9 @@ public abstract class FederationStateStoreBaseTest {
   public void testUpdateApplicationHomeSubClusterMap() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
-    ApplicationHomeSubCluster ahsc =
-        ApplicationHomeSubCluster.newInstance(appId, subClusterId1);
-
-    AddApplicationHomeSubClusterRequest addRequest =
-        AddApplicationHomeSubClusterRequest.newInstance(ahsc);
-    stateStore.addApplicationHomeSubClusterMap(addRequest);
+    addApplicationHomeSC(appId, subClusterId1);
 
     SubClusterId subClusterId2 = SubClusterId.newInstance("SC2");
-
     ApplicationHomeSubCluster ahscUpdate =
         ApplicationHomeSubCluster.newInstance(appId, subClusterId2);
 
@@ -427,6 +392,8 @@ public abstract class FederationStateStoreBaseTest {
     }
   }
 
+  // Test FederationPolicyStore
+
   @Test
   public void testSetPolicyConfiguration() throws Exception {
     SetSubClusterPolicyConfigurationRequest request =
@@ -443,28 +410,22 @@ public abstract class FederationStateStoreBaseTest {
 
   @Test
   public void testSetPolicyConfigurationUpdateExisting() throws Exception {
-    SetSubClusterPolicyConfigurationRequest request1 =
-        SetSubClusterPolicyConfigurationRequest.newInstance("Queue",
-            createSCPolicyConf("PolicyType"));
-    stateStore.setPolicyConfiguration(request1);
+    setPolicyConf("Queue", "PolicyType1");
 
     SetSubClusterPolicyConfigurationRequest request2 =
         SetSubClusterPolicyConfigurationRequest.newInstance("Queue",
-            createSCPolicyConf("PolicyType1"));
+            createSCPolicyConf("PolicyType2"));
     SetSubClusterPolicyConfigurationResponse result =
         stateStore.setPolicyConfiguration(request2);
 
     Assert.assertNotNull(result);
-    Assert.assertEquals(createSCPolicyConf("PolicyType1"),
+    Assert.assertEquals(createSCPolicyConf("PolicyType2"),
         queryPolicy("Queue"));
   }
 
   @Test
   public void testGetPolicyConfiguration() throws Exception {
-    SetSubClusterPolicyConfigurationRequest setRequest =
-        SetSubClusterPolicyConfigurationRequest.newInstance("Queue",
-            createSCPolicyConf("PolicyType"));
-    stateStore.setPolicyConfiguration(setRequest);
+    setPolicyConf("Queue", "PolicyType");
 
     GetSubClusterPolicyConfigurationRequest getRequest =
         GetSubClusterPolicyConfigurationRequest.newInstance("Queue");
@@ -493,15 +454,8 @@ public abstract class FederationStateStoreBaseTest {
 
   @Test
   public void testGetPoliciesConfigurations() throws Exception {
-    SetSubClusterPolicyConfigurationRequest setRequest1 =
-        SetSubClusterPolicyConfigurationRequest.newInstance("Queue1",
-            createSCPolicyConf("PolicyType1"));
-    stateStore.setPolicyConfiguration(setRequest1);
-
-    SetSubClusterPolicyConfigurationRequest setRequest2 =
-        SetSubClusterPolicyConfigurationRequest.newInstance("Queue2",
-            createSCPolicyConf("PolicyType2"));
-    stateStore.setPolicyConfiguration(setRequest2);
+    setPolicyConf("Queue1", "PolicyType1");
+    setPolicyConf("Queue2", "PolicyType2");
 
     GetSubClusterPoliciesConfigurationsResponse response =
         stateStore.getPoliciesConfigurations(
@@ -518,6 +472,8 @@ public abstract class FederationStateStoreBaseTest {
         .contains(createSCPolicyConf("PolicyType2")));
   }
 
+  // Convenience methods
+
   private SubClusterInfo createSubClusterInfo(SubClusterId subClusterId) {
 
     String amRMAddress = "1.2.3.4:1";
@@ -530,11 +486,34 @@ public abstract class FederationStateStoreBaseTest {
         CLOCK.getTime(), "cabability");
   }
 
-  // Test FederationPolicyStore
-
   private SubClusterPolicyConfiguration createSCPolicyConf(String policyType) {
     return SubClusterPolicyConfiguration.newInstance(policyType,
         ByteBuffer.allocate(1));
+  }
+
+  private void addApplicationHomeSC(ApplicationId appId,
+      SubClusterId subClusterId) throws YarnException {
+    ApplicationHomeSubCluster ahsc =
+        ApplicationHomeSubCluster.newInstance(appId, subClusterId);
+    AddApplicationHomeSubClusterRequest request =
+        AddApplicationHomeSubClusterRequest.newInstance(ahsc);
+    stateStore.addApplicationHomeSubClusterMap(request);
+  }
+
+  private void setPolicyConf(String queue, String policyType)
+      throws YarnException {
+    SetSubClusterPolicyConfigurationRequest request =
+        SetSubClusterPolicyConfigurationRequest.newInstance(queue,
+            createSCPolicyConf(policyType));
+    stateStore.setPolicyConfiguration(request);
+  }
+
+  private void registerSubCluster(SubClusterId subClusterId)
+      throws YarnException {
+
+    SubClusterInfo subClusterInfo = createSubClusterInfo(subClusterId);
+    stateStore.registerSubCluster(
+        SubClusterRegisterRequest.newInstance(subClusterInfo));
   }
 
   private SubClusterInfo querySubClusterInfo(SubClusterId subClusterId)
@@ -554,8 +533,6 @@ public abstract class FederationStateStoreBaseTest {
 
     return response.getApplicationHomeSubCluster().getHomeSubCluster();
   }
-
-  // Test FederationPolicyStore
 
   private SubClusterPolicyConfiguration queryPolicy(String queue)
       throws YarnException {
