@@ -93,13 +93,13 @@ public class SubClusterPolicyConfigurationPBImpl
   }
 
   @Override
-  public void setQueue(String queue) {
+  public void setQueue(String queueName) {
     maybeInitBuilder();
-    if (queue == null) {
+    if (queueName == null) {
       builder.clearType();
       return;
     }
-    builder.setQueue(queue);
+    builder.setQueue(queueName);
 
   }
 

@@ -68,7 +68,7 @@ public abstract class SubClusterPolicyConfiguration {
    */
   @Private
   @Unstable
-  public abstract void setQueue(String queue);
+  public abstract void setQueue(String queueName);
 
   /**
    * Get the type of the policy. This could be random, round-robin, load-based,
