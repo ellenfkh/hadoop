@@ -397,14 +397,15 @@ public abstract class FederationStateStoreBaseTest {
   @Test
   public void testSetPolicyConfiguration() throws Exception {
     SetSubClusterPolicyConfigurationRequest request =
-        SetSubClusterPolicyConfigurationRequest.newInstance("Queue",
-            createSCPolicyConf("PolicyType"));
+        SetSubClusterPolicyConfigurationRequest
+            .newInstance(createSCPolicyConf("Queue", "PolicyType"));
 
     SetSubClusterPolicyConfigurationResponse result =
         stateStore.setPolicyConfiguration(request);
 
     Assert.assertNotNull(result);
-    Assert.assertEquals(createSCPolicyConf("PolicyType"), queryPolicy("Queue"));
+    Assert.assertEquals(createSCPolicyConf("Queue", "PolicyType"),
+        queryPolicy("Queue"));
 
   }
 
@@ -413,13 +414,13 @@ public abstract class FederationStateStoreBaseTest {
     setPolicyConf("Queue", "PolicyType1");
 
     SetSubClusterPolicyConfigurationRequest request2 =
-        SetSubClusterPolicyConfigurationRequest.newInstance("Queue",
-            createSCPolicyConf("PolicyType2"));
+        SetSubClusterPolicyConfigurationRequest
+            .newInstance(createSCPolicyConf("Queue", "PolicyType2"));
     SetSubClusterPolicyConfigurationResponse result =
         stateStore.setPolicyConfiguration(request2);
 
     Assert.assertNotNull(result);
-    Assert.assertEquals(createSCPolicyConf("PolicyType2"),
+    Assert.assertEquals(createSCPolicyConf("Queue", "PolicyType2"),
         queryPolicy("Queue"));
   }
 
@@ -433,7 +434,7 @@ public abstract class FederationStateStoreBaseTest {
         stateStore.getPolicyConfiguration(getRequest);
 
     Assert.assertNotNull(result);
-    Assert.assertEquals(createSCPolicyConf("PolicyType"),
+    Assert.assertEquals(createSCPolicyConf("Queue", "PolicyType"),
         result.getPolicyConfiguration());
 
   }
@@ -467,9 +468,9 @@ public abstract class FederationStateStoreBaseTest {
     Assert.assertEquals(2, response.getPoliciesConfigs().size());
 
     Assert.assertTrue(response.getPoliciesConfigs()
-        .contains(createSCPolicyConf("PolicyType1")));
+        .contains(createSCPolicyConf("Queue1", "PolicyType1")));
     Assert.assertTrue(response.getPoliciesConfigs()
-        .contains(createSCPolicyConf("PolicyType2")));
+        .contains(createSCPolicyConf("Queue2", "PolicyType2")));
   }
 
   // Convenience methods
@@ -486,8 +487,9 @@ public abstract class FederationStateStoreBaseTest {
         CLOCK.getTime(), "cabability");
   }
 
-  private SubClusterPolicyConfiguration createSCPolicyConf(String policyType) {
-    return SubClusterPolicyConfiguration.newInstance(policyType,
+  private SubClusterPolicyConfiguration createSCPolicyConf(String queueName,
+      String policyType) {
+    return SubClusterPolicyConfiguration.newInstance(queueName, policyType,
         ByteBuffer.allocate(1));
   }
 
@@ -503,8 +505,8 @@ public abstract class FederationStateStoreBaseTest {
   private void setPolicyConf(String queue, String policyType)
       throws YarnException {
     SetSubClusterPolicyConfigurationRequest request =
-        SetSubClusterPolicyConfigurationRequest.newInstance(queue,
-            createSCPolicyConf(policyType));
+        SetSubClusterPolicyConfigurationRequest
+            .newInstance(createSCPolicyConf(queue, policyType));
     stateStore.setPolicyConfiguration(request);
   }
 

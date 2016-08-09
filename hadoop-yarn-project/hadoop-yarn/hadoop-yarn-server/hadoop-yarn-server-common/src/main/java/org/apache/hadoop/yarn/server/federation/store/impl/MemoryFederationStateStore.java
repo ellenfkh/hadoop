@@ -236,7 +236,8 @@ public class MemoryFederationStateStore implements FederationStateStore {
   @Override
   public SetSubClusterPolicyConfigurationResponse setPolicyConfiguration(
       SetSubClusterPolicyConfigurationRequest request) throws YarnException {
-    policies.put(request.getQueue(), request.getPolicyConfiguration());
+    policies.put(request.getPolicyConfiguration().getQueue(),
+        request.getPolicyConfiguration());
     return SetSubClusterPolicyConfigurationResponse.newInstance();
   }
 
