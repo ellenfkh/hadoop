@@ -213,7 +213,7 @@ public abstract class FederationStateStoreBaseTest {
   // Test FederationApplicationHomeSubClusterStore
 
   @Test
-  public void testAddApplicationHomeSubClusterMap() throws Exception {
+  public void testAddApplicationHomeSubCluster() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
     ApplicationHomeSubCluster ahsc =
@@ -222,15 +222,15 @@ public abstract class FederationStateStoreBaseTest {
     AddApplicationHomeSubClusterRequest request =
         AddApplicationHomeSubClusterRequest.newInstance(ahsc);
     AddApplicationHomeSubClusterResponse response =
-        stateStore.addApplicationHomeSubClusterMap(request);
+        stateStore.addApplicationHomeSubCluster(request);
 
-    Assert.assertNotNull(response);
+    Assert.assertEquals(subClusterId, response.getHomeSubCluster());
     Assert.assertEquals(subClusterId, queryApplicationHomeSC(appId));
 
   }
 
   @Test
-  public void testAddApplicationHomeSubClusterMapAppAlreadyExists()
+  public void testAddApplicationHomeSubClusterAppAlreadyExists()
       throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
@@ -240,21 +240,17 @@ public abstract class FederationStateStoreBaseTest {
     ApplicationHomeSubCluster ahsc2 =
         ApplicationHomeSubCluster.newInstance(appId, subClusterId2);
 
-    try {
-      stateStore.addApplicationHomeSubClusterMap(
-          AddApplicationHomeSubClusterRequest.newInstance(ahsc2));
-      Assert.fail();
-    } catch (YarnException e) {
-      Assert.assertTrue(e.getMessage()
-          .startsWith("Application " + appId.toString() + " already exists"));
-    }
+    AddApplicationHomeSubClusterResponse response =
+        stateStore.addApplicationHomeSubCluster(
+            AddApplicationHomeSubClusterRequest.newInstance(ahsc2));
 
+    Assert.assertEquals(subClusterId1, response.getHomeSubCluster());
     Assert.assertEquals(subClusterId1, queryApplicationHomeSC(appId));
 
   }
 
   @Test
-  public void testDeleteApplicationHomeSubClusterMap() throws Exception {
+  public void testDeleteApplicationHomeSubCluster() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
     addApplicationHomeSC(appId, subClusterId);
@@ -263,7 +259,7 @@ public abstract class FederationStateStoreBaseTest {
         DeleteApplicationHomeSubClusterRequest.newInstance(appId);
 
     DeleteApplicationHomeSubClusterResponse response =
-        stateStore.deleteApplicationHomeSubClusterMap(delRequest);
+        stateStore.deleteApplicationHomeSubCluster(delRequest);
 
     Assert.assertNotNull(response);
     try {
@@ -277,14 +273,14 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testDeleteApplicationHomeSubClusterMapUnknownApp()
+  public void testDeleteApplicationHomeSubClusterUnknownApp()
       throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     DeleteApplicationHomeSubClusterRequest delRequest =
         DeleteApplicationHomeSubClusterRequest.newInstance(appId);
 
     try {
-      stateStore.deleteApplicationHomeSubClusterMap(delRequest);
+      stateStore.deleteApplicationHomeSubCluster(delRequest);
       Assert.fail();
     } catch (YarnException e) {
       Assert.assertTrue(e.getMessage()
@@ -293,7 +289,7 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testGetApplicationHomeSubClusterMap() throws Exception {
+  public void testGetApplicationHomeSubCluster() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
     addApplicationHomeSC(appId, subClusterId);
@@ -302,7 +298,7 @@ public abstract class FederationStateStoreBaseTest {
         GetApplicationHomeSubClusterRequest.newInstance(appId);
 
     GetApplicationHomeSubClusterResponse result =
-        stateStore.getApplicationHomeSubClusterMap(getRequest);
+        stateStore.getApplicationHomeSubCluster(getRequest);
 
     Assert.assertEquals(appId,
         result.getApplicationHomeSubCluster().getApplicationId());
@@ -311,13 +307,13 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testGetApplicationHomeSubClusterMapUnknownApp() throws Exception {
+  public void testGetApplicationHomeSubClusterUnknownApp() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     GetApplicationHomeSubClusterRequest request =
         GetApplicationHomeSubClusterRequest.newInstance(appId);
 
     try {
-      stateStore.getApplicationHomeSubClusterMap(request);
+      stateStore.getApplicationHomeSubCluster(request);
       Assert.fail();
     } catch (YarnException e) {
       Assert.assertTrue(e.getMessage()
@@ -326,7 +322,7 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testGetApplicationsHomeSubClusterMap() throws Exception {
+  public void testGetApplicationsHomeSubCluster() throws Exception {
     ApplicationId appId1 = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
     ApplicationHomeSubCluster ahsc1 =
@@ -344,7 +340,7 @@ public abstract class FederationStateStoreBaseTest {
         GetApplicationsHomeSubClusterRequest.newInstance();
 
     GetApplicationsHomeSubClusterResponse result =
-        stateStore.getApplicationsHomeSubClusterMap(getRequest);
+        stateStore.getApplicationsHomeSubCluster(getRequest);
 
     Assert.assertEquals(2, result.getAppsHomeSubClusters().size());
     Assert.assertTrue(result.getAppsHomeSubClusters().contains(ahsc1));
@@ -352,7 +348,7 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testUpdateApplicationHomeSubClusterMap() throws Exception {
+  public void testUpdateApplicationHomeSubCluster() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
     addApplicationHomeSC(appId, subClusterId1);
@@ -365,15 +361,14 @@ public abstract class FederationStateStoreBaseTest {
         UpdateApplicationHomeSubClusterRequest.newInstance(ahscUpdate);
 
     UpdateApplicationHomeSubClusterResponse response =
-        stateStore.updateApplicationHomeSubClusterMap(updateRequest);
+        stateStore.updateApplicationHomeSubCluster(updateRequest);
 
     Assert.assertNotNull(response);
-
     Assert.assertEquals(subClusterId2, queryApplicationHomeSC(appId));
   }
 
   @Test
-  public void testUpdateApplicationHomeSubClusterMapUnknownApp()
+  public void testUpdateApplicationHomeSubClusterUnknownApp()
       throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
@@ -384,7 +379,7 @@ public abstract class FederationStateStoreBaseTest {
         UpdateApplicationHomeSubClusterRequest.newInstance(ahsc);
 
     try {
-      stateStore.updateApplicationHomeSubClusterMap((updateRequest));
+      stateStore.updateApplicationHomeSubCluster((updateRequest));
       Assert.fail();
     } catch (YarnException e) {
       Assert.assertTrue(e.getMessage()
@@ -499,7 +494,7 @@ public abstract class FederationStateStoreBaseTest {
         ApplicationHomeSubCluster.newInstance(appId, subClusterId);
     AddApplicationHomeSubClusterRequest request =
         AddApplicationHomeSubClusterRequest.newInstance(ahsc);
-    stateStore.addApplicationHomeSubClusterMap(request);
+    stateStore.addApplicationHomeSubCluster(request);
   }
 
   private void setPolicyConf(String queue, String policyType)
@@ -531,7 +526,7 @@ public abstract class FederationStateStoreBaseTest {
         GetApplicationHomeSubClusterRequest.newInstance(appId);
 
     GetApplicationHomeSubClusterResponse response =
-        stateStore.getApplicationHomeSubClusterMap(request);
+        stateStore.getApplicationHomeSubCluster(request);
 
     return response.getApplicationHomeSubCluster().getHomeSubCluster();
   }

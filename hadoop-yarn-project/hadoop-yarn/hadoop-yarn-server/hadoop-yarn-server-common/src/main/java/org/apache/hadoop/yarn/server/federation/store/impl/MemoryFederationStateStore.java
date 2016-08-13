@@ -156,21 +156,22 @@ public class MemoryFederationStateStore implements FederationStateStore {
   // FederationApplicationHomeSubClusterStore methods
 
   @Override
-  public AddApplicationHomeSubClusterResponse addApplicationHomeSubClusterMap(
+  public AddApplicationHomeSubClusterResponse addApplicationHomeSubCluster(
       AddApplicationHomeSubClusterRequest request) throws YarnException {
     ApplicationId appId =
         request.getApplicationHomeSubCluster().getApplicationId();
-    if (applications.containsKey(appId)) {
-      throw new YarnException("Application " + appId + " already exists");
+
+    if (!applications.containsKey(appId)) {
+      applications.put(appId,
+          request.getApplicationHomeSubCluster().getHomeSubCluster());
     }
 
-    applications.put(appId,
-        request.getApplicationHomeSubCluster().getHomeSubCluster());
-    return AddApplicationHomeSubClusterResponse.newInstance();
+    return AddApplicationHomeSubClusterResponse
+        .newInstance(applications.get(appId));
   }
 
   @Override
-  public UpdateApplicationHomeSubClusterResponse updateApplicationHomeSubClusterMap(
+  public UpdateApplicationHomeSubClusterResponse updateApplicationHomeSubCluster(
       UpdateApplicationHomeSubClusterRequest request) throws YarnException {
     ApplicationId appId =
         request.getApplicationHomeSubCluster().getApplicationId();
@@ -184,7 +185,7 @@ public class MemoryFederationStateStore implements FederationStateStore {
   }
 
   @Override
-  public GetApplicationHomeSubClusterResponse getApplicationHomeSubClusterMap(
+  public GetApplicationHomeSubClusterResponse getApplicationHomeSubCluster(
       GetApplicationHomeSubClusterRequest request) throws YarnException {
     ApplicationId appId = request.getApplicationId();
     if (!applications.containsKey(appId)) {
@@ -196,7 +197,7 @@ public class MemoryFederationStateStore implements FederationStateStore {
   }
 
   @Override
-  public GetApplicationsHomeSubClusterResponse getApplicationsHomeSubClusterMap(
+  public GetApplicationsHomeSubClusterResponse getApplicationsHomeSubCluster(
       GetApplicationsHomeSubClusterRequest request) throws YarnException {
     List<ApplicationHomeSubCluster> result =
         new ArrayList<ApplicationHomeSubCluster>();
@@ -210,7 +211,7 @@ public class MemoryFederationStateStore implements FederationStateStore {
   }
 
   @Override
-  public DeleteApplicationHomeSubClusterResponse deleteApplicationHomeSubClusterMap(
+  public DeleteApplicationHomeSubClusterResponse deleteApplicationHomeSubCluster(
       DeleteApplicationHomeSubClusterRequest request) throws YarnException {
     ApplicationId appId = request.getApplicationId();
     if (!applications.containsKey(appId)) {

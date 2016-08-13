@@ -55,11 +55,13 @@ public interface FederationApplicationHomeSubClusterStore {
    *
    * @param request the request to register a new application with its home
    *          sub-cluster
-   * @return empty on successful registration of the application in the
-   *         StateStore, if not an exception reporting reason for a failure
+   * @return upon successful registration of the application in the StateStore,
+   *         {@code AddApplicationHomeSubClusterRequest} containing the home
+   *         sub-cluster of the application. Otherwise, an exception reporting
+   *         reason for a failure
    * @throws YarnException if the request is invalid/fails
    */
-  AddApplicationHomeSubClusterResponse addApplicationHomeSubClusterMap(
+  AddApplicationHomeSubClusterResponse addApplicationHomeSubCluster(
       AddApplicationHomeSubClusterRequest request) throws YarnException;
 
   /**
@@ -73,7 +75,7 @@ public interface FederationApplicationHomeSubClusterStore {
    *         not an exception reporting reason for a failure
    * @throws YarnException if the request is invalid/fails
    */
-  UpdateApplicationHomeSubClusterResponse updateApplicationHomeSubClusterMap(
+  UpdateApplicationHomeSubClusterResponse updateApplicationHomeSubCluster(
       UpdateApplicationHomeSubClusterRequest request) throws YarnException;
 
   /**
@@ -85,7 +87,7 @@ public interface FederationApplicationHomeSubClusterStore {
    *         subcluster
    * @throws YarnException if the request is invalid/fails
    */
-  GetApplicationHomeSubClusterResponse getApplicationHomeSubClusterMap(
+  GetApplicationHomeSubClusterResponse getApplicationHomeSubCluster(
       GetApplicationHomeSubClusterRequest request) throws YarnException;
 
   /**
@@ -96,7 +98,7 @@ public interface FederationApplicationHomeSubClusterStore {
    * @return the mapping of all submitted application to it's home sub-cluster
    * @throws YarnException if the request is invalid/fails
    */
-  GetApplicationsHomeSubClusterResponse getApplicationsHomeSubClusterMap(
+  GetApplicationsHomeSubClusterResponse getApplicationsHomeSubCluster(
       GetApplicationsHomeSubClusterRequest request) throws YarnException;
 
   /**
@@ -110,7 +112,7 @@ public interface FederationApplicationHomeSubClusterStore {
    *         not an exception reporting reason for a failure
    * @throws YarnException if the request is invalid/fails
    */
-  DeleteApplicationHomeSubClusterResponse deleteApplicationHomeSubClusterMap(
+  DeleteApplicationHomeSubClusterResponse deleteApplicationHomeSubCluster(
       DeleteApplicationHomeSubClusterRequest request) throws YarnException;
 
 }
