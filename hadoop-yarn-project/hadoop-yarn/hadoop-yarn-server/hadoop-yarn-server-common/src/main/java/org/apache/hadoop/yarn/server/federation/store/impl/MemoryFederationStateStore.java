@@ -89,7 +89,6 @@ public class MemoryFederationStateStore implements FederationStateStore {
   public SubClusterRegisterResponse registerSubCluster(
       SubClusterRegisterRequest request) throws YarnException {
     SubClusterInfo subClusterInfo = request.getSubClusterInfo();
-    subClusterInfo.setLastStartTime(clock.getTime());
     membership.put(subClusterInfo.getSubClusterId(), subClusterInfo);
     return SubClusterRegisterResponse.newInstance();
   }

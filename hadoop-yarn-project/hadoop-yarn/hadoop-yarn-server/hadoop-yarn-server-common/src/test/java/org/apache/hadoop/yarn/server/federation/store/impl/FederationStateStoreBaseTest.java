@@ -187,7 +187,7 @@ public abstract class FederationStateStoreBaseTest {
     registerSubCluster(createSubClusterInfo(subClusterId));
 
     SubClusterHeartbeatRequest heartbeatRequest = SubClusterHeartbeatRequest
-        .newInstance(subClusterId, SubClusterState.SC_RUNNING, "cabability");
+        .newInstance(subClusterId, SubClusterState.SC_RUNNING, "capability");
     stateStore.subClusterHeartbeat(heartbeatRequest);
 
     Assert.assertEquals(SubClusterState.SC_RUNNING,
@@ -199,7 +199,7 @@ public abstract class FederationStateStoreBaseTest {
   public void testSubClusterHeartbeatUnknownSubCluster() throws Exception {
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
     SubClusterHeartbeatRequest heartbeatRequest = SubClusterHeartbeatRequest
-        .newInstance(subClusterId, SubClusterState.SC_RUNNING, "cabability");
+        .newInstance(subClusterId, SubClusterState.SC_RUNNING, "capability");
 
     try {
       stateStore.subClusterHeartbeat(heartbeatRequest);
@@ -273,8 +273,7 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testDeleteApplicationHomeSubClusterUnknownApp()
-      throws Exception {
+  public void testDeleteApplicationHomeSubClusterUnknownApp() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     DeleteApplicationHomeSubClusterRequest delRequest =
         DeleteApplicationHomeSubClusterRequest.newInstance(appId);
@@ -368,8 +367,7 @@ public abstract class FederationStateStoreBaseTest {
   }
 
   @Test
-  public void testUpdateApplicationHomeSubClusterUnknownApp()
-      throws Exception {
+  public void testUpdateApplicationHomeSubClusterUnknownApp() throws Exception {
     ApplicationId appId = ApplicationId.newInstance(1, 1);
     SubClusterId subClusterId1 = SubClusterId.newInstance("SC1");
     ApplicationHomeSubCluster ahsc =
@@ -479,7 +477,7 @@ public abstract class FederationStateStoreBaseTest {
 
     return SubClusterInfo.newInstance(subClusterId, amRMAddress,
         clientRMAddress, rmAdminAddress, webAppAddress, SubClusterState.SC_NEW,
-        CLOCK.getTime(), "cabability");
+        CLOCK.getTime(), "capability");
   }
 
   private SubClusterPolicyConfiguration createSCPolicyConf(String queueName,
