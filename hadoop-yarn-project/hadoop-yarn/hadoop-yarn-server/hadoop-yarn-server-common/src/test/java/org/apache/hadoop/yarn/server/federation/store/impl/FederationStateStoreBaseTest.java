@@ -94,7 +94,7 @@ public abstract class FederationStateStoreBaseTest {
   @Test
   public void testDeregisterSubCluster() throws Exception {
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
-    registerSubCluster(subClusterId);
+    registerSubCluster(createSubClusterInfo(subClusterId));
 
     SubClusterDeregisterRequest deregisterRequest = SubClusterDeregisterRequest
         .newInstance(subClusterId, SubClusterState.SC_UNREGISTERED);
@@ -124,7 +124,7 @@ public abstract class FederationStateStoreBaseTest {
 
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
     SubClusterInfo subClusterInfo = createSubClusterInfo(subClusterId);
-    registerSubCluster(subClusterId);
+    registerSubCluster(subClusterInfo);
 
     GetSubClusterInfoRequest request =
         GetSubClusterInfoRequest.newInstance(subClusterId);
@@ -184,7 +184,7 @@ public abstract class FederationStateStoreBaseTest {
   @Test
   public void testSubClusterHeartbeat() throws Exception {
     SubClusterId subClusterId = SubClusterId.newInstance("SC");
-    registerSubCluster(subClusterId);
+    registerSubCluster(createSubClusterInfo(subClusterId));
 
     SubClusterHeartbeatRequest heartbeatRequest = SubClusterHeartbeatRequest
         .newInstance(subClusterId, SubClusterState.SC_RUNNING, "cabability");
@@ -505,10 +505,8 @@ public abstract class FederationStateStoreBaseTest {
     stateStore.setPolicyConfiguration(request);
   }
 
-  private void registerSubCluster(SubClusterId subClusterId)
+  private void registerSubCluster(SubClusterInfo subClusterInfo)
       throws YarnException {
-
-    SubClusterInfo subClusterInfo = createSubClusterInfo(subClusterId);
     stateStore.registerSubCluster(
         SubClusterRegisterRequest.newInstance(subClusterInfo));
   }
