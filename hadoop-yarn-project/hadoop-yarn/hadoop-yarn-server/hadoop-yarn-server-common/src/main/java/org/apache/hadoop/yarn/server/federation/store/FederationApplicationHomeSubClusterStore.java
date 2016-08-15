@@ -51,7 +51,10 @@ public interface FederationApplicationHomeSubClusterStore {
   /**
    * Register the home {@code SubClusterId} of the newly submitted
    * {@code ApplicationId}. Currently response is empty if the operation was
-   * successful, if not an exception reporting reason for a failure.
+   * successful, if not an exception reporting reason for a failure. If a
+   * mapping for the application already existed, the {@code SubClusterId} in
+   * this response will return the existing mapping which might be different
+   * from that in the {@code AddApplicationHomeSubClusterRequest}.
    *
    * @param request the request to register a new application with its home
    *          sub-cluster

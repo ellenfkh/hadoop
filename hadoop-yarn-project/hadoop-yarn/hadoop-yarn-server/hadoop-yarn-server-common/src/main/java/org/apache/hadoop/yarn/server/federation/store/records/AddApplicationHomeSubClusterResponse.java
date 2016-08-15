@@ -29,7 +29,8 @@ import org.apache.hadoop.yarn.util.Records;
  * The response contains application's home sub-cluster as it is stored in the
  * {@code FederationApplicationHomeSubClusterStore}. If a mapping for the
  * application already existed, the {@code SubClusterId} in this response will
- * not match that in the {@code AddApplicationHomeSubClusterRequest}.
+ * return the existing mapping which might be different from that in the
+ * {@code AddApplicationHomeSubClusterRequest}.
  */
 @Private
 @Unstable
