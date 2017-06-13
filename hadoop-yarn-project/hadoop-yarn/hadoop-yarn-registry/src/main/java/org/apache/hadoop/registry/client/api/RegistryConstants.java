@@ -266,21 +266,21 @@ public interface RegistryConstants {
   /**
    *  path to users off the root: {@value}.
    */
-  String PATH_USERS = "/users/";
+  String PATH_USERS =  "/user/";
 
   /**
    *  path to system services off the root : {@value}.
    */
-  String PATH_SYSTEM_SERVICES = "/services/";
+  String PATH_SYSTEM_SERVICES = "/core/";
 
   /**
    *  path to system services under a user's home path : {@value}.
    */
-  String PATH_USER_SERVICES = "/services/";
+  String PATH_USER_SERVICES = DEFAULT_ZK_REGISTRY_ROOT + "/user/";
 
   /**
    *  path under a service record to point to components of that service:
    *  {@value}.
    */
-  String SUBPATH_COMPONENTS = "/components/";
+  String SUBPATH_COMPONENTS = DEFAULT_ZK_REGISTRY_ROOT + "/user/";
 }

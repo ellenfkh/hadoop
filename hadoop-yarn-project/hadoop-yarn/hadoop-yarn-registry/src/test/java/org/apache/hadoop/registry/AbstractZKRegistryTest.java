@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-public class AbstractZKRegistryTest extends RegistryTestHelper {
+public class AbstractZKRegistryTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(AbstractZKRegistryTest.class);
 
@@ -63,7 +63,7 @@ public class AbstractZKRegistryTest extends RegistryTestHelper {
 
   @AfterClass
   public static void teardownServices() throws IOException {
-    describe(LOG, "teardown of static services");
+    RegistryTestHelper.describe(LOG, "teardown of static services");
     servicesToTeardown.close();
   }
 
@@ -74,7 +74,7 @@ public class AbstractZKRegistryTest extends RegistryTestHelper {
   public static void createZKServer() throws Exception {
     File zkDir = new File("target/zookeeper");
     FileUtils.deleteDirectory(zkDir);
-    assertTrue(zkDir.mkdirs());
+    RegistryTestHelper.assertTrue(zkDir.mkdirs());
     zookeeper = new MicroZookeeperService("InMemoryZKService");
     YarnConfiguration conf = new YarnConfiguration();
     conf.set(MicroZookeeperServiceKeys.KEY_ZKSERVICE_DIR, zkDir.getAbsolutePath());

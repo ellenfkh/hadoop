@@ -29,7 +29,7 @@ import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.registry.client.impl.zk.RegistryBindingSource;
 import org.apache.hadoop.registry.client.types.yarn.PersistencePolicies;
 import org.apache.hadoop.registry.server.services.DeleteCompletionCallback;
-import org.apache.hadoop.registry.server.services.RegistryAdminService;
+import org.apache.hadoop.registry.server.services.ZKRegistryAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ import java.util.concurrent.Future;
  */
 @InterfaceAudience.LimitedPrivate("YARN")
 @InterfaceStability.Evolving
-public class RMRegistryOperationsService extends RegistryAdminService {
+public class RMRegistryOperationsService extends ZKRegistryAdminService {
   private static final Logger LOG =
       LoggerFactory.getLogger(RMRegistryOperationsService.class);
 
@@ -73,7 +73,7 @@ public class RMRegistryOperationsService extends RegistryAdminService {
    * @throws Exception
    */
   @Override
-  protected void serviceInit(Configuration conf) throws Exception {
+  public void serviceInit(Configuration conf) throws Exception {
     super.serviceInit(conf);
 
     verifyRealmValidity();

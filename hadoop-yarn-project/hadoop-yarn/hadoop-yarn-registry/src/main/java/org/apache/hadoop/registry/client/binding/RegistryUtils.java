@@ -21,16 +21,20 @@ package org.apache.hadoop.registry.client.binding;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
+import org.apache.curator.utils.ZKPaths;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.PathNotFoundException;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.registry.client.api.RegistryConstants;
-import org.apache.hadoop.registry.client.api.RegistryOperations;
+import org.apache.hadoop.registry.client.api.records.ApplicationServiceRecordKey;
+import org.apache.hadoop.registry.client.api.records.ContainerServiceRecordKey;
+import org.apache.hadoop.registry.client.api.records.CoreServiceRecordKey;
+import org.apache.hadoop.registry.client.api.records.ServiceRecordKey;
 import org.apache.hadoop.registry.client.exceptions.InvalidPathnameException;
-import org.apache.hadoop.registry.client.exceptions.InvalidRecordException;
-import org.apache.hadoop.registry.client.exceptions.NoRecordException;
+import org.apache.hadoop.registry.client.exceptions.InvalidRegistryKeyException;
 import org.apache.hadoop.registry.client.impl.zk.RegistryInternalConstants;
+import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsZKService;
 import org.apache.hadoop.registry.client.types.RegistryPathStatus;
 import org.apache.hadoop.registry.client.types.ServiceRecord;
 import org.slf4j.Logger;
@@ -38,12 +42,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.hadoop.registry.client.binding.RegistryPathUtils.*;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -162,24 +163,6 @@ public class RegistryUtils {
   }
 
   /**
-   * List service records directly under a path
-   * @param registryOperations registry operations instance
-   * @param path path to list
-   * @return a mapping of the service records that were resolved, indexed
-   * by their full path
-   * @throws IOException
-   */
-  public static Map<String, ServiceRecord> listServiceRecords(
-      RegistryOperations registryOperations,
-      String path) throws IOException {
-    Map<String, RegistryPathStatus> children =
-        statChildren(registryOperations, path);
-    return extractServiceRecords(registryOperations,
-        path,
-        children.values());
-  }
-
-  /**
    * List children of a directory and retrieve their
    * {@link RegistryPathStatus} values.
    * <p>
@@ -196,7 +179,7 @@ public class RegistryUtils {
    * @throws IOException Any other IO Exception
    */
   public static Map<String, RegistryPathStatus> statChildren(
-      RegistryOperations registryOperations,
+      RegistryOperationsZKService registryOperations,
       String path)
       throws PathNotFoundException,
       InvalidPathnameException,
@@ -300,80 +283,103 @@ public class RegistryUtils {
   }
 
   /**
-   * Extract all service records under a list of stat operations...this
-   * skips entries that are too short or simply not matching
-   * @param operations operation support for fetches
-   * @param parentpath path of the parent of all the entries
-   * @param stats Collection of stat results
-   * @return a possibly empty map of fullpath:record.
-   * @throws IOException for any IO Operation that wasn't ignored.
+   * Create a unique ZK path to store this key
+   * 
+   * @throws InvalidRegistryKeyException
    */
-  public static Map<String, ServiceRecord> extractServiceRecords(
-      RegistryOperations operations,
-      String parentpath,
-      Collection<RegistryPathStatus> stats) throws IOException {
-    Map<String, ServiceRecord> results = new HashMap<String, ServiceRecord>(stats.size());
-    for (RegistryPathStatus stat : stats) {
-      if (stat.size > ServiceRecord.RECORD_TYPE.length()) {
-        // maybe has data
-        String path = join(parentpath, stat.path);
-        try {
-          ServiceRecord serviceRecord = operations.resolve(path);
-          results.put(path, serviceRecord);
-        } catch (EOFException ignored) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("data too short for {}", path);
-          }
-        } catch (InvalidRecordException record) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Invalid record at {}", path);
-          }
-        } catch (NoRecordException record) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("No record at {}", path);
-          }
-        }
-      }
+  public static String getPathForServiceRecordKey(ServiceRecordKey key)
+      throws InvalidRegistryKeyException {
+    if (!key.validate()) {
+      throw new InvalidRegistryKeyException(key.toString());
     }
-    return results;
+    String path = null;
+    if (key instanceof CoreServiceRecordKey) {
+      // Create path: "/core/<serviceClass>/<instanceName>"
+      CoreServiceRecordKey coreServiceRecordKey = (CoreServiceRecordKey) key;
+
+      path = ZKPaths.makePath("core", coreServiceRecordKey.getServiceClass(),
+          coreServiceRecordKey.getInstanceName());
+    } else if (key instanceof ApplicationServiceRecordKey) {
+      // Create path: "/user/<serviceClass>/<username>/<appId>"
+      ApplicationServiceRecordKey applicationServiceRecordKey =
+          (ApplicationServiceRecordKey) key;
+      path = ZKPaths.makePath("user",
+          applicationServiceRecordKey.getUsername(),
+          applicationServiceRecordKey.getServiceClass(),
+          applicationServiceRecordKey.getAppId().toString());
+
+    } else if (key instanceof ContainerServiceRecordKey) {
+      // Create path: "/user/<serviceClass>/<username>/<appId>/<containerId>"
+      ContainerServiceRecordKey containerServiceRecordKey =
+          (ContainerServiceRecordKey) key;
+      path =
+          ZKPaths.makePath("user",
+              containerServiceRecordKey.getUsername(), 
+              containerServiceRecordKey.getServiceClass(),
+              containerServiceRecordKey.getAppId().toString(),
+              containerServiceRecordKey.getContainerId().toString());
+
+    } else {
+      throw new InvalidRegistryKeyException(key.toString());
+    }
+    return path;
+  }
+  
+  /**
+   * Construct a ServiceRecordKey from a ZK path
+   * 
+   * @param path
+   * @return
+   * @throws InvalidRegistryKeyException
+   */
+  public static ServiceRecordKey getServiceRecordKeyFromZKPath(String path)
+      throws InvalidRegistryKeyException {
+    List<String> pathComponents = ZKPaths.split(path);
+
+    int len = pathComponents.size();
+    ServiceRecordKey key;
+
+    if (len == 3) {
+      key = new CoreServiceRecordKey(pathComponents.get(1),
+          pathComponents.get(2));
+    } else if (len == 4) {
+      key = new ApplicationServiceRecordKey(pathComponents.get(1),
+          pathComponents.get(2), (pathComponents.get(3)));
+    } else if (len == 5) {
+      key = new ContainerServiceRecordKey(pathComponents.get(1),
+          pathComponents.get(2), pathComponents.get(3), pathComponents.get(4));
+    } else {
+      throw new InvalidRegistryKeyException(path);
+    }
+    return key;
   }
 
   /**
-   * Extract all service records under a list of stat operations...this
-   * non-atomic action skips entries that are too short or simply not matching.
-   * <p>
-   * @param operations operation support for fetches
-   * @param parentpath path of the parent of all the entries
-   * @return a possibly empty map of fullpath:record.
-   * @throws IOException for any IO Operation that wasn't ignored.
+   * Construct a ServiceRecordKey from a list of args.
+   * 
+   * @param path
+   * @return
+   * @throws InvalidRegistryKeyException
    */
-  public static Map<String, ServiceRecord> extractServiceRecords(
-      RegistryOperations operations,
-      String parentpath,
-      Map<String , RegistryPathStatus> stats) throws IOException {
-    return extractServiceRecords(operations, parentpath, stats.values());
+  public static ServiceRecordKey getServiceRecordKeyFromArgs(
+      List<String> argsList) throws InvalidRegistryKeyException {
+
+    int len = argsList.size();
+    ServiceRecordKey key;
+
+    if (len == 3) {
+      key = new CoreServiceRecordKey(argsList.get(1), argsList.get(2));
+    } else if (len == 4) {
+      key = new ApplicationServiceRecordKey(argsList.get(1), argsList.get(2),
+          argsList.get(3));
+    } else if (len == 5) {
+      key = new ContainerServiceRecordKey(argsList.get(1), argsList.get(2),
+          argsList.get(3), argsList.get(4));
+    } else {
+      throw new InvalidRegistryKeyException(String.join(", ", argsList));
+    }
+    return key;
   }
-
-
-  /**
-   * Extract all service records under a list of stat operations...this
-   * non-atomic action skips entries that are too short or simply not matching.
-   * <p>
-   * @param operations operation support for fetches
-   * @param parentpath path of the parent of all the entries
-   * @return a possibly empty map of fullpath:record.
-   * @throws IOException for any IO Operation that wasn't ignored.
-   */
-  public static Map<String, ServiceRecord> extractServiceRecords(
-      RegistryOperations operations,
-      String parentpath) throws IOException {
-    return
-    extractServiceRecords(operations,
-        parentpath,
-        statChildren(operations, parentpath).values());
-  }
-
-
 
   /**
    * Static instance of service record marshalling

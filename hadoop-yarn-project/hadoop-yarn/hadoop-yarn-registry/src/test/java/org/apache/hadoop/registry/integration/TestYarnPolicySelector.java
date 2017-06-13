@@ -23,7 +23,7 @@ import org.apache.hadoop.registry.client.types.yarn.PersistencePolicies;
 import org.apache.hadoop.registry.client.types.RegistryPathStatus;
 import org.apache.hadoop.registry.client.types.ServiceRecord;
 import org.apache.hadoop.registry.server.integration.SelectByYarnPersistence;
-import org.apache.hadoop.registry.server.services.RegistryAdminService;
+import org.apache.hadoop.registry.server.services.ZKRegistryAdminService;
 import org.junit.Test;
 
 public class TestYarnPolicySelector extends RegistryTestHelper {
@@ -35,7 +35,7 @@ public class TestYarnPolicySelector extends RegistryTestHelper {
   private RegistryPathStatus status = new RegistryPathStatus("/", 0, 0, 1);
 
   public void assertSelected(boolean outcome,
-      RegistryAdminService.NodeSelector selector) {
+      ZKRegistryAdminService.NodeSelector selector) {
     boolean select = selector.shouldSelect("/", status, record);
     assertEquals(selector.toString(), outcome, select);
   }

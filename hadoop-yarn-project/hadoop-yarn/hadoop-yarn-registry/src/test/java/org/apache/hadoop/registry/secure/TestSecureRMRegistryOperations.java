@@ -26,13 +26,20 @@ import org.apache.hadoop.service.ServiceStateException;
 import org.apache.hadoop.registry.client.api.RegistryConstants;
 import org.apache.hadoop.registry.client.api.RegistryOperations;
 import org.apache.hadoop.registry.client.api.RegistryOperationsFactory;
+import org.apache.hadoop.registry.client.api.records.ServiceRecordKey;
+import org.apache.hadoop.registry.client.api.records.ApplicationServiceRecordKey;
+import org.apache.hadoop.registry.client.api.records.ContainerServiceRecordKey;
+import org.apache.hadoop.registry.client.api.records.CoreServiceRecordKey;
+import org.apache.hadoop.registry.client.binding.RegistryUtils;
+import org.apache.hadoop.registry.client.exceptions.InvalidRegistryKeyException;
 import org.apache.hadoop.registry.client.exceptions.NoPathPermissionsException;
 import org.apache.hadoop.registry.client.impl.zk.ZKPathDumper;
-import org.apache.hadoop.registry.client.impl.RegistryOperationsClient;
+import org.apache.hadoop.registry.client.impl.RegistryOperationsZKClient;
 import org.apache.hadoop.registry.client.impl.zk.RegistrySecurity;
 import org.apache.hadoop.registry.client.impl.zk.ZookeeperConfigOptions;
+import org.apache.hadoop.registry.client.types.ServiceRecord;
 import org.apache.hadoop.registry.server.integration.RMRegistryOperationsService;
-import org.apache.hadoop.registry.server.services.RegistryAdminService;
+import org.apache.hadoop.registry.server.services.ZKRegistryAdminService;
 import org.apache.zookeeper.client.ZooKeeperSaslClient;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -112,6 +119,7 @@ public class TestSecureRMRegistryOperations extends AbstractSecureRegistryTest {
 
   /**
    * test that ZK can write as itself
+   * 
    * @throws Throwable
    */
   @Test
@@ -120,8 +128,8 @@ public class TestSecureRMRegistryOperations extends AbstractSecureRegistryTest {
     RMRegistryOperationsService rmRegistryOperations =
         startRMRegistryOperations();
     RegistryOperations operations = rmRegistryOperations;
-    operations.mknode(PATH_SYSTEM_SERVICES + "hdfs",
-        false);
+    ServiceRecordKey key = new CoreServiceRecordKey("hdfs", "system_instance");
+    operations.register(key, new ServiceRecord());
     ZKPathDumper pathDumper = rmRegistryOperations.dumpPath(true);
     LOG.info(pathDumper.toString());
   }
@@ -150,36 +158,24 @@ public class TestSecureRMRegistryOperations extends AbstractSecureRegistryTest {
         RegistryOperationsFactory.createAnonymousInstance(zkClientConf);
     addToTeardown(operations);
     operations.start();
-
-    String servicePath = PATH_SYSTEM_SERVICES + "hdfs";
-    expectMkNodeFailure(operations, servicePath);
+    ZKPathDumper pathDumper = rmRegistryOperations.dumpPath(true);    
+    ServiceRecordKey key = new CoreServiceRecordKey("hdfs", "system_instance");
+    expectMkNodeFailure(operations, key);
   }
 
-  @Test
-  public void testAnonNoWriteAccessOffRoot() throws Throwable {
-    RMRegistryOperationsService rmRegistryOperations =
-        startRMRegistryOperations();
-    describe(LOG, "testAnonNoWriteAccessOffRoot");
-    RegistryOperations operations =
-        RegistryOperationsFactory.createAnonymousInstance(zkClientConf);
-    addToTeardown(operations);
-    operations.start();
-    assertFalse("mknode(/)", operations.mknode("/", false));
-    expectMkNodeFailure(operations, "/sub");
-    expectDeleteFailure(operations, PATH_SYSTEM_SERVICES, true);
-  }
 
   /**
    * Expect a mknode operation to fail
    * @param operations operations instance
    * @param path path
    * @throws IOException An IO failure other than those permitted
+   * @throws InvalidRegistryKeyException 
    */
-  public void expectMkNodeFailure(RegistryOperations operations,
-      String path) throws IOException {
+  private void expectMkNodeFailure(RegistryOperations operations,
+      ServiceRecordKey key) throws IOException, InvalidRegistryKeyException {
     try {
-      operations.mknode(path, false);
-      fail("should have failed to create a node under " + path);
+      operations.register(key, new ServiceRecord());
+      fail("should have failed to create a node under " +  RegistryUtils.getPathForServiceRecordKey(key));
     } catch (PathPermissionException expected) {
       // expected
     } catch (NoPathPermissionsException expected) {
@@ -193,12 +189,13 @@ public class TestSecureRMRegistryOperations extends AbstractSecureRegistryTest {
    * @param path path
    * @param recursive
    * @throws IOException An IO failure other than those permitted
+   * @throws InvalidRegistryKeyException 
    */
-  public void expectDeleteFailure(RegistryOperations operations,
-      String path, boolean recursive) throws IOException {
+  private void expectDeleteFailure(RegistryOperations operations,
+      ServiceRecordKey key) throws IOException, InvalidRegistryKeyException {
     try {
-      operations.delete(path, recursive);
-      fail("should have failed to delete the node " + path);
+      operations.deregister(key);
+      fail("should have failed to delete the node " + RegistryUtils.getPathForServiceRecordKey(key));
     } catch (PathPermissionException expected) {
       // expected
     } catch (NoPathPermissionsException expected) {
@@ -217,34 +214,14 @@ public class TestSecureRMRegistryOperations extends AbstractSecureRegistryTest {
     addToTeardown(anonOperations);
     anonOperations.start();
     anonOperations.list(aliceHome);
-    expectMkNodeFailure(anonOperations, aliceHome + "/anon");
-    expectDeleteFailure(anonOperations, aliceHome, true);
-  }
 
-  @Test
-  public void testUserZookeeperHomePathAccess() throws Throwable {
-    RMRegistryOperationsService rmRegistryOperations =
-        startRMRegistryOperations();
-    final String home = rmRegistryOperations.initUserRegistry(ZOOKEEPER);
-    describe(LOG, "Creating ZK client");
+    ServiceRecordKey key =
+        new ApplicationServiceRecordKey("alice", "hdfs", "app");
 
-    RegistryOperations operations = zookeeperUGI.doAs(
-        new PrivilegedExceptionAction<RegistryOperations>() {
-          @Override
-          public RegistryOperations run() throws Exception {
-            RegistryOperations operations =
-                RegistryOperationsFactory.createKerberosInstance(zkClientConf,
-                    ZOOKEEPER_CLIENT_CONTEXT);
-            addToTeardown(operations);
-            operations.start();
-
-            return operations;
-          }
-        });
-    operations.list(home);
-    String path = home + "/subpath";
-    operations.mknode(path, false);
-    operations.delete(path, true);
+    expectMkNodeFailure(anonOperations, key);
+    rmRegistryOperations.register(key, new ServiceRecord());
+    anonOperations.resolve(key);
+    expectDeleteFailure(anonOperations, key);
   }
 
   @Test
@@ -267,57 +244,8 @@ public class TestSecureRMRegistryOperations extends AbstractSecureRegistryTest {
       }
     }
     assertNotNull(aliceACL);
-    assertEquals(RegistryAdminService.USER_HOMEDIR_ACL_PERMISSIONS,
+    assertEquals(ZKRegistryAdminService.USER_HOMEDIR_ACL_PERMISSIONS,
         aliceACL.getPerms());
-  }
-
-  @Test
-  public void testDigestAccess() throws Throwable {
-    RMRegistryOperationsService registryAdmin =
-        startRMRegistryOperations();
-    String id = "username";
-    String pass = "password";
-    registryAdmin.addWriteAccessor(id, pass);
-    List<ACL> clientAcls = registryAdmin.getClientAcls();
-    LOG.info("Client ACLS=\n{}", RegistrySecurity.aclsToString(clientAcls));
-
-    String base = "/digested";
-    registryAdmin.mknode(base, false);
-    List<ACL> baseACLs = registryAdmin.zkGetACLS(base);
-    String aclset = RegistrySecurity.aclsToString(baseACLs);
-    LOG.info("Base ACLs=\n{}", aclset);
-    ACL found = null;
-    for (ACL acl : baseACLs) {
-      if (ZookeeperConfigOptions.SCHEME_DIGEST.equals(acl.getId().getScheme())) {
-        found = acl;
-        break;
-      }
-    }
-    assertNotNull("Did not find digest entry in ACLs " + aclset, found);
-    zkClientConf.set(KEY_REGISTRY_USER_ACCOUNTS,
-        "sasl:somebody@EXAMPLE.COM, sasl:other");
-    RegistryOperations operations =
-        RegistryOperationsFactory.createAuthenticatedInstance(zkClientConf,
-            id,
-            pass);
-    addToTeardown(operations);
-    operations.start();
-    RegistryOperationsClient operationsClient =
-        (RegistryOperationsClient) operations;
-    List<ACL> digestClientACLs = operationsClient.getClientAcls();
-    LOG.info("digest client ACLs=\n{}",
-        RegistrySecurity.aclsToString(digestClientACLs));
-    operations.stat(base);
-    operations.mknode(base + "/subdir", false);
-    ZKPathDumper pathDumper = registryAdmin.dumpPath(true);
-    LOG.info(pathDumper.toString());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testNoDigestAuthMissingId() throws Throwable {
-    RegistryOperationsFactory.createAuthenticatedInstance(zkClientConf,
-        "",
-        "pass");
   }
 
   @Test(expected = ServiceStateException.class)

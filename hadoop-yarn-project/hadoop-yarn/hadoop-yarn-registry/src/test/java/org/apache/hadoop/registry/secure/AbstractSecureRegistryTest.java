@@ -365,4 +365,19 @@ public class AbstractSecureRegistryTest extends RegistryTestHelper {
     secureZK.start();
   }
 
+  /**
+   * Set the JVM property to enable Kerberos debugging
+   */
+  public static void enableKerberosDebugging() {
+    System.setProperty(AbstractSecureRegistryTest.SUN_SECURITY_KRB5_DEBUG,
+        "true");
+  }
+  /**
+   * Set the JVM property to enable Kerberos debugging
+   */
+  public static void disableKerberosDebugging() {
+    System.setProperty(AbstractSecureRegistryTest.SUN_SECURITY_KRB5_DEBUG,
+        "false");
+  }
+
 }

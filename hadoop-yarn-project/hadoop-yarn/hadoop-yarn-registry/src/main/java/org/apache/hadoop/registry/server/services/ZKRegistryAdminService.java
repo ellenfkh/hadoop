@@ -29,10 +29,12 @@ import org.apache.hadoop.service.ServiceStateException;
 import org.apache.hadoop.registry.client.binding.RegistryUtils;
 import org.apache.hadoop.registry.client.binding.RegistryPathUtils;
 import org.apache.hadoop.registry.client.exceptions.InvalidRecordException;
+import org.apache.hadoop.registry.client.exceptions.InvalidRegistryKeyException;
 import org.apache.hadoop.registry.client.exceptions.NoPathPermissionsException;
 import org.apache.hadoop.registry.client.exceptions.NoRecordException;
 import org.apache.hadoop.registry.client.impl.zk.RegistryBindingSource;
-import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsService;
+import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsZKService;
+import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsZKService;
 import org.apache.hadoop.registry.client.impl.zk.RegistrySecurity;
 import org.apache.hadoop.registry.client.types.RegistryPathStatus;
 import org.apache.hadoop.registry.client.types.ServiceRecord;
@@ -76,10 +78,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * implements the recursive purge operation —the class
  * {{AsyncPurge}} provides the asynchronous scheduling of this.
  */
-public class RegistryAdminService extends RegistryOperationsService {
+public class ZKRegistryAdminService extends RegistryOperationsZKService {
 
   private static final Logger LOG =
-      LoggerFactory.getLogger(RegistryAdminService.class);
+      LoggerFactory.getLogger(ZKRegistryAdminService.class);
   /**
    * The ACL permissions for the user's homedir ACL.
    */
@@ -96,7 +98,7 @@ public class RegistryAdminService extends RegistryOperationsService {
    * Construct an instance of the service
    * @param name service name
    */
-  public RegistryAdminService(String name) {
+  public ZKRegistryAdminService(String name) {
     this(name, null);
   }
 
@@ -106,7 +108,7 @@ public class RegistryAdminService extends RegistryOperationsService {
    * @param name service name
    * @param bindingSource provider of ZK binding information
    */
-  public RegistryAdminService(String name,
+  public ZKRegistryAdminService(String name,
       RegistryBindingSource bindingSource) {
     super(name, bindingSource);
     executor = HadoopExecutors.newCachedThreadPool(
@@ -126,7 +128,7 @@ public class RegistryAdminService extends RegistryOperationsService {
    * @throws Exception exception.
    */
   @Override
-  protected void serviceStop() throws Exception {
+  public void serviceStop() throws Exception {
     stopExecutor();
     super.serviceStop();
   }
@@ -191,7 +193,7 @@ public class RegistryAdminService extends RegistryOperationsService {
    * @throws Exception
    */
   @Override
-  protected void serviceInit(Configuration conf) throws Exception {
+  public void serviceInit(Configuration conf) throws Exception {
     super.serviceInit(conf);
     RegistrySecurity registrySecurity = getRegistrySecurity();
     if (registrySecurity.isSecureRegistry()) {
@@ -208,7 +210,7 @@ public class RegistryAdminService extends RegistryOperationsService {
    * @throws Exception
    */
   @Override
-  protected void serviceStart() throws Exception {
+  public void serviceStart() throws Exception {
     super.serviceStart();
     // create the root directories
     try {
@@ -407,7 +409,8 @@ public class RegistryAdminService extends RegistryOperationsService {
 
     try {
       RegistryPathStatus registryPathStatus = stat(path);
-      ServiceRecord serviceRecord = resolve(path);
+      ServiceRecord serviceRecord =
+          resolve(RegistryUtils.getServiceRecordKeyFromZKPath(path));
       // there is now an entry here.
       toDelete = selector.shouldSelect(path, registryPathStatus, serviceRecord);
     } catch (EOFException ignored) {
@@ -420,6 +423,8 @@ public class RegistryAdminService extends RegistryOperationsService {
       // there's no record here, it may have been deleted already.
       // exit
       return 0;
+    } catch (InvalidRegistryKeyException e) {
+      LOG.error("Failed to create registry key from zk path " + path, e);
     }
 
     if (toDelete && !entries.isEmpty()) {
