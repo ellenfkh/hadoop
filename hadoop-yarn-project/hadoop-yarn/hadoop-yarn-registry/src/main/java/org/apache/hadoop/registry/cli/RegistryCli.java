@@ -46,6 +46,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.registry.client.api.BindFlags;
 import org.apache.hadoop.registry.client.api.RegistryOperations;
 import org.apache.hadoop.registry.client.api.RegistryOperationsFactory;
+import org.apache.hadoop.registry.client.api.records.ServiceRecordKey;
+import org.apache.hadoop.registry.client.binding.RegistryUtils;
 import org.apache.hadoop.registry.client.exceptions.AuthenticationFailedException;
 import org.apache.hadoop.registry.client.exceptions.InvalidPathnameException;
 import org.apache.hadoop.registry.client.exceptions.InvalidRecordException;
@@ -148,53 +150,17 @@ public class RegistryCli extends Configured implements Tool, Closeable {
     Preconditions.checkArgument(getConf() != null, "null configuration");
     if (args.length > 0) {
       switch (args[0]) {
-        case "ls":
-          return ls(args);
         case "resolve":
           return resolve(args);
-        case "bind":
-          return bind(args);
-        case "mknode":
-          return mknode(args);
-        case "rm":
-          return rm(args);
+        case "register":
+          return register(args);
+        case "deregister":
+          return deregister(args);
         default:
           return usageError("Invalid command: " + args[0], USAGE);
       }
     }
     return usageError("No command arg passed.", USAGE);
-  }
-
-  @SuppressWarnings("unchecked")
-  public int ls(String[] args) {
-
-    Options lsOption = new Options();
-    CommandLineParser parser = new GnuParser();
-    try {
-      CommandLine line = parser.parse(lsOption, args);
-
-      List<String> argsList = line.getArgList();
-      if (argsList.size() != 2) {
-        return usageError("ls requires exactly one path argument", LS_USAGE);
-      }
-      if (!validatePath(argsList.get(1))) {
-        return -1;
-      }
-
-      try {
-        List<String> children = registry.list(argsList.get(1));
-        for (String child : children) {
-          sysout.println(child);
-        }
-        return 0;
-
-      } catch (Exception e) {
-        syserr.println(analyzeException("ls", e, argsList));
-      }
-      return -1;
-    } catch (ParseException exp) {
-      return usageError("Invalid syntax " + exp, LS_USAGE);
-    }
   }
 
   @SuppressWarnings("unchecked")
@@ -214,7 +180,9 @@ public class RegistryCli extends Configured implements Tool, Closeable {
       }
 
       try {
-        ServiceRecord record = registry.resolve(argsList.get(1));
+        ServiceRecordKey key =
+            RegistryUtils.getServiceRecordKeyFromArgs(argsList);
+        ServiceRecord record = registry.resolve(key);
 
         for (Endpoint endpoint : record.external) {
           sysout.println(" Endpoint(ProtocolType="
@@ -245,7 +213,7 @@ public class RegistryCli extends Configured implements Tool, Closeable {
 
   }
 
-  public int bind(String[] args) {
+  public int register(String[] args) {
     Option rest = OptionBuilder.withArgName("rest")
                                .hasArg()
                                .withDescription("rest Option")
@@ -372,7 +340,10 @@ public class RegistryCli extends Configured implements Tool, Closeable {
     }
 
     try {
-      registry.bind(argsList.get(1), sr, BindFlags.OVERWRITE);
+      ServiceRecordKey key =
+          RegistryUtils.getServiceRecordKeyFromArgs(argsList);
+
+      registry.register(key, sr);
       return 0;
     } catch (Exception e) {
       syserr.println(analyzeException("bind", e, argsList));
@@ -382,36 +353,7 @@ public class RegistryCli extends Configured implements Tool, Closeable {
   }
 
   @SuppressWarnings("unchecked")
-  public int mknode(String[] args) {
-    Options mknodeOption = new Options();
-    CommandLineParser parser = new GnuParser();
-    try {
-      CommandLine line = parser.parse(mknodeOption, args);
-
-      List<String> argsList = line.getArgList();
-      if (argsList.size() != 2) {
-        return usageError("mknode requires exactly one path argument",
-            MKNODE_USAGE);
-      }
-      if (!validatePath(argsList.get(1))) {
-        return -1;
-      }
-
-      try {
-        registry.mknode(args[1], false);
-        return 0;
-      } catch (Exception e) {
-        syserr.println(analyzeException("mknode", e, argsList));
-      }
-      return -1;
-    } catch (ParseException exp) {
-      return usageError("Invalid syntax " + exp.toString(), MKNODE_USAGE);
-    }
-  }
-
-
-  @SuppressWarnings("unchecked")
-  public int rm(String[] args) {
+  public int deregister(String[] args) {
     Option recursive = OptionBuilder.withArgName("recursive")
                                     .withDescription("delete recursively")
                                     .create("r");
@@ -438,7 +380,9 @@ public class RegistryCli extends Configured implements Tool, Closeable {
           recursiveOpt = true;
         }
 
-        registry.delete(argsList.get(1), recursiveOpt);
+        ServiceRecordKey key =
+            RegistryUtils.getServiceRecordKeyFromArgs(argsList);
+        registry.deregister(key);
         return 0;
       } catch (Exception e) {
         syserr.println(analyzeException("rm", e, argsList));

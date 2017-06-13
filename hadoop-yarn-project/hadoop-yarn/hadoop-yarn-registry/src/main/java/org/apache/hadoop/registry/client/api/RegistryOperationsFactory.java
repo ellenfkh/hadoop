@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.service.ServiceStateException;
-import org.apache.hadoop.registry.client.impl.RegistryOperationsClient;
+import org.apache.hadoop.registry.client.impl.RegistryOperationsZKClient;
 
 import static org.apache.hadoop.registry.client.api.RegistryConstants.*;
 
@@ -61,8 +61,8 @@ public final class RegistryOperationsFactory {
    */
   public static RegistryOperations createInstance(String name, Configuration conf) {
     Preconditions.checkArgument(conf != null, "Null configuration");
-    RegistryOperationsClient operations =
-        new RegistryOperationsClient(name);
+    RegistryOperationsZKClient operations =
+        new RegistryOperationsZKClient(name);
     operations.init(conf);
     return operations;
   }

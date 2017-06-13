@@ -28,7 +28,6 @@ import org.apache.hadoop.registry.client.types.Endpoint;
 import org.apache.hadoop.registry.client.types.ProtocolTypes;
 import org.apache.hadoop.registry.client.types.ServiceRecord;
 import org.apache.hadoop.registry.client.types.yarn.YarnRegistryAttributes;
-import org.apache.hadoop.registry.secure.AbstractSecureRegistryTest;
 import org.apache.zookeeper.common.PathUtils;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -112,21 +111,6 @@ public class RegistryTestHelper extends Assert {
     assertNotNull("Null login context", loginContext);
     Subject subject = loginContext.getSubject();
     LOG.info("Logged in as {}:\n {}", name, subject);
-  }
-
-  /**
-   * Set the JVM property to enable Kerberos debugging
-   */
-  public static void enableKerberosDebugging() {
-    System.setProperty(AbstractSecureRegistryTest.SUN_SECURITY_KRB5_DEBUG,
-        "true");
-  }
-  /**
-   * Set the JVM property to enable Kerberos debugging
-   */
-  public static void disableKerberosDebugging() {
-    System.setProperty(AbstractSecureRegistryTest.SUN_SECURITY_KRB5_DEBUG,
-        "false");
   }
 
   /**

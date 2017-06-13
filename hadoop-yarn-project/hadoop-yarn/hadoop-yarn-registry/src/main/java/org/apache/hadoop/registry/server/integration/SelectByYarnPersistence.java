@@ -23,13 +23,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.registry.client.types.RegistryPathStatus;
 import org.apache.hadoop.registry.client.types.ServiceRecord;
 import org.apache.hadoop.registry.client.types.yarn.YarnRegistryAttributes;
-import org.apache.hadoop.registry.server.services.RegistryAdminService;
+import org.apache.hadoop.registry.server.services.ZKRegistryAdminService;
 
 /**
  * Select an entry by the YARN persistence policy
  */
 public class SelectByYarnPersistence
-    implements RegistryAdminService.NodeSelector {
+    implements ZKRegistryAdminService.NodeSelector {
   private final String id;
   private final String targetPolicy;
 
@@ -43,18 +43,15 @@ public class SelectByYarnPersistence
 
   @Override
   public boolean shouldSelect(String path,
-      RegistryPathStatus registryPathStatus,
-      ServiceRecord serviceRecord) {
+      RegistryPathStatus registryPathStatus, ServiceRecord serviceRecord) {
     String policy =
         serviceRecord.get(YarnRegistryAttributes.YARN_PERSISTENCE, "");
     return id.equals(serviceRecord.get(YarnRegistryAttributes.YARN_ID, ""))
-           && (targetPolicy.equals(policy));
+        && (targetPolicy.equals(policy));
   }
 
   @Override
   public String toString() {
-    return String.format(
-        "Select by ID %s and policy %s: {}",
-        id, targetPolicy);
+    return String.format("Select by ID %s and policy %s: {}", id, targetPolicy);
   }
 }

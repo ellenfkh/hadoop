@@ -21,6 +21,7 @@ package org.apache.hadoop.registry.secure;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.service.ServiceOperations;
 import org.apache.hadoop.registry.client.impl.zk.ZKPathDumper;
+import org.apache.hadoop.registry.AbstractZKRegistryTest;
 import org.apache.hadoop.registry.client.impl.zk.CuratorService;
 import org.apache.hadoop.registry.client.impl.zk.RegistrySecurity;
 import org.apache.zookeeper.CreateMode;

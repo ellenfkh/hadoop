@@ -21,7 +21,7 @@ package org.apache.hadoop.registry.client.impl;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.registry.client.impl.zk.RegistryBindingSource;
-import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsService;
+import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsZKService;
 
 
 /**
@@ -42,13 +42,13 @@ import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsService;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class RegistryOperationsClient extends RegistryOperationsService {
+public class RegistryOperationsZKClient extends RegistryOperationsZKService {
 
-  public RegistryOperationsClient(String name) {
+  public RegistryOperationsZKClient(String name) {
     super(name);
   }
 
-  public RegistryOperationsClient(String name,
+  public RegistryOperationsZKClient(String name,
       RegistryBindingSource bindingSource) {
     super(name, bindingSource);
   }
