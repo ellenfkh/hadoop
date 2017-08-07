@@ -21,14 +21,21 @@ package org.apache.hadoop.registry.client.binding;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
+import org.apache.curator.utils.ZKPaths;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.PathNotFoundException;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.hadoop.registry.api.ApplicationServiceRecordKey;
+import org.apache.hadoop.registry.api.ContainerServiceRecordKey;
+import org.apache.hadoop.registry.api.CoreServiceRecordKey;
+import org.apache.hadoop.registry.api.RegistryStoreProtocol;
+import org.apache.hadoop.registry.api.ServiceRecordKey;
 import org.apache.hadoop.registry.client.api.RegistryConstants;
 import org.apache.hadoop.registry.client.api.RegistryOperations;
 import org.apache.hadoop.registry.client.exceptions.InvalidPathnameException;
 import org.apache.hadoop.registry.client.exceptions.InvalidRecordException;
+import org.apache.hadoop.registry.client.exceptions.InvalidRegistryKeyException;
 import org.apache.hadoop.registry.client.exceptions.NoRecordException;
 import org.apache.hadoop.registry.client.impl.zk.RegistryInternalConstants;
 import org.apache.hadoop.registry.client.types.RegistryPathStatus;
@@ -373,7 +380,104 @@ public class RegistryUtils {
         statChildren(operations, parentpath).values());
   }
 
+  /**
+   * Create a unique ZK path to store this key
+   * 
+   * @throws InvalidRegistryKeyException
+   */
+  public static String getPathForServiceRecordKey(ServiceRecordKey key)
+      throws InvalidRegistryKeyException {
+    if (!key.validate()) {
+      throw new InvalidRegistryKeyException(key.toString());
+    }
+    String path = null;
+    if (key instanceof CoreServiceRecordKey) {
+      // Create path: "/core/<serviceClass>/<instanceName>"
+      CoreServiceRecordKey coreServiceRecordKey = (CoreServiceRecordKey) key;
 
+      path = ZKPaths.makePath("core", coreServiceRecordKey.getServiceClass(),
+          coreServiceRecordKey.getInstanceName());
+    } else if (key instanceof ApplicationServiceRecordKey) {
+      // Create path: "/user/<serviceClass>/<username>/<appId>"
+      ApplicationServiceRecordKey applicationServiceRecordKey =
+          (ApplicationServiceRecordKey) key;
+      path = ZKPaths.makePath("user",
+          applicationServiceRecordKey.getUsername(),
+          applicationServiceRecordKey.getServiceClass(),
+          applicationServiceRecordKey.getAppId().toString());
+
+    } else if (key instanceof ContainerServiceRecordKey) {
+      // Create path: "/user/<serviceClass>/<username>/<appId>/<containerId>"
+      ContainerServiceRecordKey containerServiceRecordKey =
+          (ContainerServiceRecordKey) key;
+      path =
+          ZKPaths.makePath("user",
+              containerServiceRecordKey.getUsername(), 
+              containerServiceRecordKey.getServiceClass(),
+              containerServiceRecordKey.getAppId().toString(),
+              containerServiceRecordKey.getContainerId().toString());
+
+    } else {
+      throw new InvalidRegistryKeyException(key.toString());
+    }
+    return path;
+  }
+  
+  /**
+   * Construct a ServiceRecordKey from a ZK path
+   * 
+   * @param path
+   * @return
+   * @throws InvalidRegistryKeyException
+   */
+  public static ServiceRecordKey getServiceRecordKeyFromZKPath(String path)
+      throws InvalidRegistryKeyException {
+    List<String> pathComponents = ZKPaths.split(path);
+
+    int len = pathComponents.size();
+    ServiceRecordKey key;
+
+    if (len == 3) {
+      key = new CoreServiceRecordKey(pathComponents.get(1),
+          pathComponents.get(2));
+    } else if (len == 4) {
+      key = new ApplicationServiceRecordKey(pathComponents.get(1),
+          pathComponents.get(2), (pathComponents.get(3)));
+    } else if (len == 5) {
+      key = new ContainerServiceRecordKey(pathComponents.get(1),
+          pathComponents.get(2), pathComponents.get(3), pathComponents.get(4));
+    } else {
+      throw new InvalidRegistryKeyException(path);
+    }
+    return key;
+  }
+
+  /**
+   * Construct a ServiceRecordKey from a list of args.
+   * 
+   * @param path
+   * @return
+   * @throws InvalidRegistryKeyException
+   */
+  public static ServiceRecordKey getServiceRecordKeyFromArgs(
+      List<String> argsList) throws InvalidRegistryKeyException {
+
+    int len = argsList.size();
+    ServiceRecordKey key;
+
+    if (len == 3) {
+      key = new CoreServiceRecordKey(argsList.get(1), argsList.get(2));
+    } else if (len == 4) {
+      key = new ApplicationServiceRecordKey(argsList.get(1), argsList.get(2),
+          argsList.get(3));
+    } else if (len == 5) {
+      key = new ContainerServiceRecordKey(argsList.get(1), argsList.get(2),
+          argsList.get(3), argsList.get(4));
+    } else {
+      throw new InvalidRegistryKeyException(String.join(", ", argsList));
+    }
+    return key;
+  }
 
   /**
    * Static instance of service record marshalling
@@ -383,4 +487,11 @@ public class RegistryUtils {
       super(ServiceRecord.class);
     }
   }
+
+  //TODO placeholder
+	public static Map<String, RegistryPathStatus> statChildren(RegistryStoreProtocol registryAdminService,
+			String path) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
