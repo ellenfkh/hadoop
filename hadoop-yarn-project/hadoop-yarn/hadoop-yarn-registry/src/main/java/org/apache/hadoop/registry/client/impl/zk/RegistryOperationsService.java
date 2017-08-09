@@ -21,12 +21,19 @@ package org.apache.hadoop.registry.client.impl.zk;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+import org.apache.hadoop.registry.api.ListenerHandle;
+import org.apache.hadoop.registry.api.PathListener;
+import org.apache.hadoop.registry.api.RegistryListenerProtocol;
+import org.apache.hadoop.registry.api.RegistryStoreProtocol;
+import org.apache.hadoop.registry.api.ServiceRecordKey;
 import org.apache.hadoop.registry.client.api.BindFlags;
 import org.apache.hadoop.registry.client.api.RegistryOperations;
 
 import org.apache.hadoop.registry.client.binding.RegistryTypeUtils;
 import org.apache.hadoop.registry.client.binding.RegistryUtils;
 import org.apache.hadoop.registry.client.exceptions.InvalidPathnameException;
+import org.apache.hadoop.registry.client.exceptions.InvalidRecordException;
+import org.apache.hadoop.registry.client.exceptions.InvalidRegistryKeyException;
 import org.apache.hadoop.registry.client.exceptions.NoRecordException;
 import org.apache.hadoop.registry.client.binding.RegistryPathUtils;
 import org.apache.hadoop.registry.client.types.RegistryPathStatus;
@@ -53,8 +60,8 @@ import java.util.List;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class RegistryOperationsService extends CuratorService
-  implements RegistryOperations {
+public class RegistryOperationsService extends CuratorService implements
+    RegistryOperations, RegistryStoreProtocol, RegistryListenerProtocol {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(RegistryOperationsService.class);
@@ -158,6 +165,40 @@ public class RegistryOperationsService extends CuratorService
   public void delete(String path, boolean recursive) throws IOException {
     validatePath(path);
     zkDelete(path, recursive, null);
+  }
+
+  @Override
+  public ListenerHandle registerPathListener(PathListener listener)
+      throws Exception {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void monitorRegistryEntries() throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void register(ServiceRecordKey key, ServiceRecord record)
+      throws InvalidRecordException, InvalidRegistryKeyException, IOException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public ServiceRecord resolve(ServiceRecordKey key)
+      throws NoRecordException, IOException, InvalidRegistryKeyException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void deregister(ServiceRecordKey key)
+      throws NoRecordException, IOException, InvalidRegistryKeyException {
+    // TODO Auto-generated method stub
+
   }
 
 }

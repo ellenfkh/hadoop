@@ -488,10 +488,4 @@ public class RegistryUtils {
     }
   }
 
-  //TODO placeholder
-	public static Map<String, RegistryPathStatus> statChildren(RegistryStoreProtocol registryAdminService,
-			String path) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
