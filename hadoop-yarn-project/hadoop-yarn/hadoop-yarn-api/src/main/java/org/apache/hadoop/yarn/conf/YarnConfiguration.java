@@ -2859,6 +2859,11 @@ public class YarnConfiguration extends Configuration {
       SHARED_CACHE_PREFIX + "nm.uploader.thread-count";
   public static final int DEFAULT_SHARED_CACHE_NM_UPLOADER_THREAD_COUNT = 20;
 
+  public static final String YARN_REGISTRY_CLASS =
+      YARN_PREFIX + "registry.class";
+  public static final String DEFAULT_YARN_REGISTRY_CLASS =
+      "org.apache.hadoop.registry.client.impl.RegistryOperationsStoreService";
+
   ////////////////////////////////
   // Federation Configs
   ////////////////////////////////
